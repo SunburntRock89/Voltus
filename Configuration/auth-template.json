@@ -1,0 +1,12 @@
+{
+	"discord": {
+		"token": ""
+	},
+
+	"db": {
+		"host": "",
+		"name": "",
+		"user": "",
+		"pwd": ""
+	}
+}
