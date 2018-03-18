@@ -1,11 +1,14 @@
 const { Client } = require("discord.js");
 const reload = require("require-reload")(require);
-const Sequalize = require("sequalize");
+const Sequelize = require("sequelize");
+
+const auth = require("./Configuration/auth.json");
+const config = require("./Configuration/config.json");
 
 const client = new Client({
 	disableEveryone: true,
 });
-const sequalize = new Sequalize(auth.db.name, auth.db.user, auth.db.pwd, {
+const sequelize = new Sequelize(auth.db.name, auth.db.user, auth.db.pwd, {
 	host: auth.db.host,
 	dialect: "mysql",
 
@@ -17,8 +20,6 @@ const sequalize = new Sequalize(auth.db.name, auth.db.user, auth.db.pwd, {
 	},
 });
 
-const auth = require("./Configuration/auth.json");
-const config = require("./Configuration/config.json");
 
 client.once("ready", () => {
 	console.log(`Logged in as ${client.user.tag}`);
@@ -64,6 +65,10 @@ client.on("message", async msg => {
 		}
 	}
 	return cmdFile(client, msg, suffix);
+});
+
+process.on("unhandledRejection", (_, promise) => {
+	console.log(require("util").inspect(promise, null, 2));
 });
 
 client.login(auth.discord.token);
