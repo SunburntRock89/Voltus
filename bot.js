@@ -21,9 +21,9 @@ const sequelize = new Sequelize(auth.db.name, auth.db.user, auth.db.pwd, {
 });
 
 
-client.once("ready", () => {
+client.once("ready", async() => {
 	console.log(`Logged in as ${client.user.tag}`);
-	if (client.guilds.size === 0) console.log(`This bot isn't in any servers! Invite it using ${client.generateInvite(["ADMINISTRATOR"])}`);
+	if (client.guilds.size === 0) console.log(`This bot isn't in any servers! Invite it using ${await client.generateInvite(["ADMINISTRATOR"])}`);
 });
 
 Object.assign(String.prototype, {
