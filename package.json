@@ -1,0 +1,22 @@
+{
+  "name": "codename-jeffery",
+  "version": "1.0.0",
+  "description": "^^^ my name is",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunburntRock89/Codename-Jeffery.git"
+  },
+  "author": "Banging Dev Team",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/SunburntRock89/Codename-Jeffery/issues"
+  },
+  "homepage": "https://github.com/SunburntRock89/Codename-Jeffery#readme",
+  "dependencies": {
+    "discord.js": "github:discordjs/discord.js"
+  }
+}
