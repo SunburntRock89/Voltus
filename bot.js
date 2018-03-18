@@ -68,8 +68,7 @@ client.on("message", async msg => {
 	return cmdFile(client, msg, suffix);
 });
 
-process.on("unhandledRejection", (_, promise) => {
-	console.log(require("util").inspect(promise, null, 2));
-});
+process.on("unhandledRejection", (_, promise) => console.log(require("util").inspect(promise, null, 2)));
+
 
 client.login(auth.discord.token);

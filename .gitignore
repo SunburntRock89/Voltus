@@ -59,3 +59,4 @@ typings/
 
 # Authentication and Tokens
 Configuration/auth.json
+Configuration/config.json
