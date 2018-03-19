@@ -8,9 +8,14 @@ const config = require("./Configuration/config.json");
 const client = new Client({
 	disableEveryone: true,
 });
-const sequelize = new Sequelize(auth.db.name, auth.db.user, auth.db.pwd, {
+const sequelize = new Sequelize({
 	host: auth.db.host,
+	database: auth.db.name,
+	username: auth.db.user,
+	password: auth.db.pwd,
+
 	dialect: "mysql",
+	logging: false,
 
 	pool: {
 		max: 5,
@@ -25,17 +30,18 @@ client.once("ready", async() => {
 	console.log(`Logged in as ${client.user.tag}`);
 	if (client.guilds.size === 0) console.log(`This bot isn't in any servers! Invite it using ${await client.generateInvite(["ADMINISTRATOR"])}`);
 	client.user.setActivity("Starting...");
-	await require("./Database/init.js")(client, sequelize);
+	await require("./Database/init.js")(sequelize);
 	for (let g of client.guilds) {
 		let doc;
 		try {
-			doc = await ServerConfigs.findOneById(g[1].id);
+			doc = await ServerConfigs.findOne({ where: { id: g[1].id } });
 			if (!doc) throw new Error();
 		} catch (err) {
 			require("./Events/guildCreate")(client, g[1]);
 		}
 	}
 	readytostart = true;
+	client.user.setActivity(`Serving ${client.guilds.size} servers`);
 	console.log("Ready!");
 });
 
@@ -51,12 +57,12 @@ client.on("message", async msg => {
 	if (msg.author.bot) return;
 	let doc;
 	if (msg.guild) {
-		doc = await ServerConfigs.findOneById(msg.guild.id);
+		doc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
 		if (!doc) throw new Error("Something went hideously wrong with the server config document for ", msg.guild.id);
 	}
-	if (msg.guild && !msg.content.startsWith(doc.get("prefix"))) return;
+	if (msg.guild && !msg.content.startsWith(doc.dataValues.prefix)) return;
 
-	const cmd = msg.content.split(" ")[0].trim().toLowerCase().replace(msg.guild ? doc.get("prefix") : "", "");
+	const cmd = msg.content.split(" ")[0].trim().toLowerCase().replace(msg.guild ? doc.dataValues.prefix : "", "");
 	const suffix = msg.content.split(" ").splice(1).join(" ")
 		.trim();
 

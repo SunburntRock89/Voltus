@@ -3,41 +3,101 @@ const auth = require("../Configuration/auth.json");
 const Sequelize = require("sequelize");
 const mysql = require("mysql2/promise");
 
-module.exports = async(client, sequelize) => {
+module.exports = async sequelize => {
 	const connection = await mysql.createConnection({ host: auth.db.host, user: auth.db.user, password: auth.db.pwd });
 	await connection.execute(`CREATE DATABASE IF NOT EXISTS ${auth.db.name};`);
 	await connection.close();
 
-	const ServerConfigs = sequelize.define("ServersConfigs", {
-		id: { type: Sequelize.STRING, allowNull: false, primaryKey: true },
-		// Prefix
-		prefix: { type: Sequelize.STRING, defaultValue: "!" },
-		// Agree
-		agreeEnabled: { type: Sequelize.BOOLEAN, defaultValue: false },
-		agreeChannel: { type: Sequelize.STRING, allowNull: true },
-		// New Member
-		newMemberEnabled: { type: Sequelize.BOOLEAN, defaultValue: false },
-		newMemberMessage: { type: Sequelize.STRING, allowNull: true },
+	const ServerConfigs = sequelize.define("ServerConfigs", {
+		id: {
+			type: Sequelize.STRING,
+			allowNull: false,
+			primaryKey: true,
+		},
+		prefix: {
+			type: Sequelize.STRING(10),
+			allowNull: true,
+			defaultValue: "-",
+		},
+		muteEnabled: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+		},
+		muteRole: {
+			type: Sequelize.STRING,
+			allowNull: true,
+		},
+		newMemberEnabled: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+		},
+		newMemberChannel: {
+			type: Sequelize.STRING,
+			allowNull: true,
+		},
+		agreeEnabled: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+		},
+		agreeChannel: {
+			type: Sequelize.STRING,
+			allowNull: true,
+		},
+		agreeRole: {
+			type: Sequelize.STRING,
+			allowNull: true,
+		},
+	}, {
+		timestamps: false,
 	});
 
 	const Strikes = sequelize.define("Strikes", {
-		id: { type: Sequelize.STRING, allowNull: false, primaryKey: true },
-		offender: { type: Sequelize.STRING, allowNull: false },
-		creator: { type: Sequelize.STRING, allowNull: false },
-		reason: { type: Sequelize.STRING, allowNull: false },
+		id: {
+			type: Sequelize.STRING,
+			allowNull: false,
+			primaryKey: true,
+		},
+		guild: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		offender: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		creator: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		reason: {
+			type: Sequelize.STRING,
+			allowNull: true,
+		},
+	}, {
+		timestamps: false,
 	});
 
 	const Admins = sequelize.define("Admins", {
-		// This is the Admin's ID
-		id: { type: Sequelize.STRING, allowNull: false },
-		// Server's ID
-		serverID: { type: Sequelize.STRING, allowNull: false },
-		level: { type: Sequelize.INTEGER, allowNull: false },
+		id: {
+			type: Sequelize.STRING,
+			allowNull: true,
+			primaryKey: true,
+		},
+		serverID: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		level: {
+			type: Sequelize.INTEGER,
+			allowNull: true,
+		},
 	});
 
 	global.ServerConfigs = ServerConfigs;
 	global.Strikes = Strikes;
 	global.Admins = Admins;
 
-	sequelize.sync();
+	ServerConfigs.sync();
+	Strikes.sync();
+	Admins.sync();
 };
