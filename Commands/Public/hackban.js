@@ -89,7 +89,7 @@ module.exports = async(client, msg, suffix) => {
 			embed: {
 				color: 0x00FF00,
 				title: ":white_check_mark: Success!",
-				description: `Successfully banned **${name}** with ${reason == "No reason" ? "no reason." : `reason: ${reason}`}`,
+				description: `Successfully banned **${name}** with ${reason == "No reason" ? "no reason." : `reason: **${reason}**`}`,
 				footer: {
 					text: `You now have ${msg.guild.members.size} members.`,
 				},

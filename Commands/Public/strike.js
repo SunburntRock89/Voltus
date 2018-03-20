@@ -96,7 +96,7 @@ module.exports = async(client, msg, suffix) => {
 		embed: {
 			color: 0x00FF00,
 			title: ":white_check_mark: Success!",
-			description: `Successfully striked ${member.toString()} with ${reason == "No reason" ? "no reason." : `reason: ${reason}`}`,
+			description: `Successfully striked ${member.toString()} with ${reason == "No reason" ? "no reason." : `reason: **${reason}**`}`,
 			footer: {
 				text: `They now have ${allUserStrikes.length} ${allUserStrikes.length == 1 ? "strike" : "strikes"}.`,
 			},

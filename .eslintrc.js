@@ -11,6 +11,8 @@ module.exports = {
 		ServerConfigs: true,
 		Strikes: true,
 		Admins: true,
+		Giveaways: true,
+		GiveawayParticipants: true,
 	},
 	rules: {
 		"no-compare-neg-zero": "error",

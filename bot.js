@@ -41,7 +41,7 @@ client.once("ready", async() => {
 		}
 	}
 	readytostart = true;
-	client.user.setActivity(`Serving ${client.guilds.size} ${client.guilds.size == 1 ? "server" : "servers"}`);
+	client.user.setActivity(`websitenamehere`);
 	console.log("Ready!");
 });
 

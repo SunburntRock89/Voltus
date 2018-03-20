@@ -100,7 +100,7 @@ module.exports = async(client, msg, suffix) => {
 			embed: {
 				color: 0x00FF00,
 				title: ":white_check_mark: Success!",
-				description: `Successfully kicked **${member.user.tag}** with ${reason == "No reason" ? "no reason." : `reason: ${reason}`}`,
+				description: `Successfully kicked **${member.user.tag}** with ${reason == "No reason" ? "no reason." : `reason: **${reason}**`}`,
 				footer: {
 					text: `You now have ${msg.guild.members.size} members.`,
 				},
@@ -125,6 +125,7 @@ module.exports = async(client, msg, suffix) => {
 			switch (cmsg.content.toLowerCase()) {
 				case "yes": {
 					await kickFunc();
+					await collector.stop();
 					break;
 				}
 				case "no": {
@@ -138,6 +139,11 @@ module.exports = async(client, msg, suffix) => {
 							},
 						},
 					});
+					await collector.stop();
+					break;
+				}
+				default: {
+					await collector.stop();
 					break;
 				}
 			}

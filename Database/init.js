@@ -60,6 +60,11 @@ module.exports = async sequelize => {
 			defaultValue: true,
 			allowNull: false,
 		},
+		ownerEndsGiveaway: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
 	}, {
 		timestamps: false,
 	});
@@ -96,6 +101,13 @@ module.exports = async sequelize => {
 			allowNull: true,
 			primaryKey: true,
 		},
+		/* How admin levels work
+			1: Strike
+			2: Kick ^
+			3: Ban ^
+			4: Config, hackban and unban ^
+			5: Maintainers ^
+		*/
 		serverID: {
 			type: Sequelize.STRING,
 			allowNull: false,
@@ -106,11 +118,62 @@ module.exports = async sequelize => {
 		},
 	});
 
+	const Giveaways = sequelize.define("Giveaways", {
+		id: {
+			type: Sequelize.STRING,
+			allowNull: true,
+			primaryKey: true,
+		},
+		owner: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		created: {
+			type: Sequelize.DATE,
+			allowNull: false,
+		},
+		serverID: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		title: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		winnerMsg: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		status: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+		},
+	});
+
+	const GiveawayParticipants = sequelize.define("GiveawayParticipants", {
+		id: {
+			type: Sequelize.STRING,
+			autoIncrement: true,
+		},
+		giveawayID: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		userID: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+	});
+
 	global.ServerConfigs = ServerConfigs;
 	global.Strikes = Strikes;
 	global.Admins = Admins;
+	global.Giveaways = Giveaways;
+	global.GiveawayParticipants = GiveawayParticipants;
 
 	ServerConfigs.sync();
 	Strikes.sync();
 	Admins.sync();
+	Giveaways.sync();
+	GiveawayParticipants.sync();
 };

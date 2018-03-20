@@ -18,5 +18,4 @@ module.exports = async(client, guild) => {
 		},
 	});
 	console.log(`Joined server: ${guild.name}. ID: ${guild.id}`);
-	client.user.setActivity(`Serving ${client.guilds.size} ${client.guilds.size == 1 ? "server" : "servers"}`);
 };
