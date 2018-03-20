@@ -103,7 +103,7 @@ module.exports = async(client, msg, suffix) => {
 		},
 	});
 };
-module.exports.help = {
+module.exports.info = {
 	name: "Strike",
 	description: "Regan help me write a description for this",
 	pack: "moderation",

@@ -17,4 +17,5 @@ module.exports = async(client, guild) => {
 			description: `I've just been added to **${guild.name}**, a server you own! To get started, run ${doc[0].dataValues.prefix}config`,
 		},
 	});
+	client.user.setActivity(`Serving ${client.guilds.size} ${client.guilds.size == 1 ? "strike" : "strikes"}`);
 };

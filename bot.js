@@ -41,7 +41,7 @@ client.once("ready", async() => {
 		}
 	}
 	readytostart = true;
-	client.user.setActivity(`Serving ${client.guilds.size} servers`);
+	client.user.setActivity(`Serving ${client.guilds.size} ${client.guilds.size == 1 ? "strike" : "strikes"}`);
 	console.log("Ready!");
 });
 
@@ -93,28 +93,28 @@ client.on("message", async msg => {
 	cmdFile(client, msg, suffix);
 });
 
-client.memberSearch = async(string, server) => new Promise((resolve, reject) => {
+client.memberSearch = async(string, guild) => new Promise((resolve, reject) => {
 	let foundMember;
 	string = string.trim();
 
 	if (string.startsWith("<@!")) {
-		foundMember = server.members.get(string.slice(3, -1));
+		foundMember = guild.members.get(string.slice(3, -1));
 	} else if (string.startsWith("<@")) {
-		foundMember = server.members.get(string.slice(2, -1));
+		foundMember = guild.members.get(string.slice(2, -1));
 	} else if (!isNaN(string) && new RegExp(/^\d+$/).test(string)) {
-		foundMember = server.members.get(string);
+		foundMember = guild.members.get(string);
 	} else if (string.startsWith("@")) {
 		string = string.slice(1);
 	}
 	if (string.lastIndexOf("#") === string.length - 5 && !isNaN(string.substring(string.lastIndexOf("#") + 1))) {
-		foundMember = server.members.filter(member => member.user.username === string.substring(0, string.lastIndexOf("#") + 1))
+		foundMember = guild.members.filter(member => member.user.username === string.substring(0, string.lastIndexOf("#") + 1))
 			.find(member => member.user.discriminator === string.substring(string.lastIndexOf("#") + 1));
 	}
 	if (!foundMember) {
-		foundMember = server.members.find(member => member.user.username.toLowerCase() === string.toLowerCase());
+		foundMember = guild.members.find(member => member.user.username.toLowerCase() === string.toLowerCase());
 	}
 	if (!foundMember) {
-		foundMember = server.members.find(member => member.nickname && member.nickname.toLowerCase() === string.toLowerCase());
+		foundMember = guild.members.find(member => member.nickname && member.nickname.toLowerCase() === string.toLowerCase());
 	}
 	if (foundMember) {
 		resolve(foundMember);
