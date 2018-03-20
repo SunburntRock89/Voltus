@@ -107,9 +107,10 @@ module.exports = async(client, msg, suffix) => {
 		});
 	}
 };
+
 module.exports.info = {
 	name: "Eval",
 	description: "Evaluates Javascript and returns the response.",
 	pack: "utility",
-	level: 4,
+	level: 5,
 };

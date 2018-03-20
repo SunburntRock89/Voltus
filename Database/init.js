@@ -22,6 +22,7 @@ module.exports = async sequelize => {
 		muteEnabled: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
+			allowNull: false,
 		},
 		muteRole: {
 			type: Sequelize.STRING,
@@ -30,6 +31,7 @@ module.exports = async sequelize => {
 		newMemberEnabled: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
+			allowNull: false,
 		},
 		newMemberChannel: {
 			type: Sequelize.STRING,
@@ -38,6 +40,7 @@ module.exports = async sequelize => {
 		agreeEnabled: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
+			allowNull: false,
 		},
 		agreeChannel: {
 			type: Sequelize.STRING,
@@ -46,6 +49,16 @@ module.exports = async sequelize => {
 		agreeRole: {
 			type: Sequelize.STRING,
 			allowNull: true,
+		},
+		kickConfirms: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: true,
+			allowNull: false,
+		},
+		banConfirms: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: true,
+			allowNull: false,
 		},
 	}, {
 		timestamps: false,

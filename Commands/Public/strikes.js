@@ -49,6 +49,7 @@ module.exports = async(client, msg, suffix) => {
 		},
 	});
 };
+
 module.exports.info = {
 	name: "Strikes",
 	description: "Allows you to view a user's strikes.",

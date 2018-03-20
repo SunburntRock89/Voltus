@@ -41,7 +41,7 @@ client.once("ready", async() => {
 		}
 	}
 	readytostart = true;
-	client.user.setActivity(`Serving ${client.guilds.size} ${client.guilds.size == 1 ? "strike" : "strikes"}`);
+	client.user.setActivity(`Serving ${client.guilds.size} ${client.guilds.size == 1 ? "server" : "servers"}`);
 	console.log("Ready!");
 });
 
