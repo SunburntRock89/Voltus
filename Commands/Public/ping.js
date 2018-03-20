@@ -10,3 +10,9 @@ module.exports = async(client, msg, args) => {
 		},
 	});
 };
+module.exports.help = {
+	name: "Ping",
+	description: "Shows you the ping to the Discord API.",
+	pack: "utility",
+	level: 0,
+};
