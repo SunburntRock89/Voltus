@@ -42,7 +42,7 @@ module.exports = async(client, msg, suffix) => {
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
-				description: "Not a valid user!.",
+				description: "Not a valid user!",
 				footer: {
 					text: require("../../package.json").version,
 				},
@@ -56,5 +56,52 @@ module.exports = async(client, msg, suffix) => {
 	} catch (err) {
 		name = suffix;
 	}
-	// TODO: FINISH THIS
+
+	let bans;
+	try {
+		bans = await msg.guild.fetchBans();
+	} catch (err) {
+		return msg.channel.send({
+			embed: {
+				color: 0xFF0000,
+				title: ":x: Error!",
+				description: "There are no users banned from this server!",
+				footer: {
+					text: require("../../package.json").version,
+				},
+			},
+		});
+	}
+
+	let userBan = bans.get(user);
+	if (!userBan) {
+		return msg.channel.send({
+			embed: {
+				color: 0xFF0000,
+				title: ":x: Error!",
+				description: "This user is not banned!",
+				footer: {
+					text: require("../../package.json").version,
+				},
+			},
+		});
+	}
+
+	await msg.guild.members.unban(userBan.user, reason);
+	msg.channel.send({
+		embed: {
+			color: 0x00FF00,
+			title: ":white_check_mark: Success!",
+			description: `Successfully unbanned **${name}** with ${reason == "No reason" ? "no reason." : `reason: ${reason}`}`,
+			footer: {
+				text: `You now have ${msg.guild.members.size} members.`,
+			},
+		},
+	});
+};
+module.exports.info = {
+	name: "Unban",
+	description: "Allows you to unban users from your server.",
+	pack: "moderation",
+	level: 4,
 };
