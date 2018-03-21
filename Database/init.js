@@ -142,20 +142,28 @@ module.exports = async sequelize => {
 		},
 		winnerMsg: {
 			type: Sequelize.STRING,
-			allowNull: false,
+			allowNull: true,
 		},
 		status: {
 			type: Sequelize.BOOLEAN,
+			defaultValue: true,
+		},
+		allowReroll: {
+			type: Sequelize.BOOLEAN,
 			defaultValue: false,
+		},
+		winner: {
+			type: Sequelize.STRING,
+			allowNull: true,
 		},
 	});
 
 	const GiveawayParticipants = sequelize.define("GiveawayParticipants", {
-		id: {
-			type: Sequelize.STRING,
-			autoIncrement: true,
-		},
 		giveawayID: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
+		guildID: {
 			type: Sequelize.STRING,
 			allowNull: false,
 		},

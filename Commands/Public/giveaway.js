@@ -29,6 +29,10 @@ module.exports = async(client, msg, suffix) => {
 					value: `Allows ${serverDoc.dataValues.ownerEndsGiveaway ? `the giveaway owner` : `an admin`} to end a giveaway and choose a winner.`,
 				},
 				{
+					name: "Reroll",
+					value: "Allows you to repick the giveaway winner. Cannot be ran with a giveaway message.",
+				},
+				{
 					name: "Leave",
 					value: "Allows a user to leave the giveaway.",
 				}],
@@ -97,7 +101,7 @@ module.exports = async(client, msg, suffix) => {
 					embed: {
 						color: 0x7452A2,
 						title: "Voltus",
-						description: "Thanks, now enter what I should send to the winner when the giveaway is ended.",
+						description: "Thanks, now enter what I should send to the winner when the giveaway is ended or type nothing if you don't want me to send them anything.",
 						footer: {
 							text: require("../../package.json").version,
 						},
@@ -106,6 +110,7 @@ module.exports = async(client, msg, suffix) => {
 				let collector2 = await msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000, number: 1 });
 				collector2.on("collect", async c2msg => {
 					let winMsg = c2msg.content;
+					if (winMsg.toLowerCase() == "nothing") winMsg = null;
 					await c2msg.delete();
 					let id = randomstring.generate({ length: "8", charset: "alphanumeric" });
 					await Giveaways.create({
@@ -199,6 +204,7 @@ module.exports = async(client, msg, suffix) => {
 					},
 				});
 			}
+
 			let giveawayDoc = await Giveaways.findOne({ where: { id: giveawayID, serverID: msg.guild.id } });
 			if (!giveawayDoc) {
 				return msg.channel.send({
@@ -230,6 +236,7 @@ module.exports = async(client, msg, suffix) => {
 			await GiveawayParticipants.create({
 				giveawayID,
 				userID: msg.author.id,
+				guildID: msg.guild.id,
 			});
 
 			msg.channel.send({
@@ -258,6 +265,19 @@ module.exports = async(client, msg, suffix) => {
 					},
 				});
 			}
+			let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
+			if ((!doc || doc.dataValues.level !== 2) && !maintainers.includes(msg.author.id)) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "You do not have permission to execute this command.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
 			let giveawayDoc = await Giveaways.findOne({ where: { id: giveawayID, serverID: msg.guild.id } });
 			if (!giveawayDoc) {
 				return msg.channel.send({
@@ -272,11 +292,134 @@ module.exports = async(client, msg, suffix) => {
 				});
 			}
 
+			if (serverDoc.dataValues.ownerEndsGiveaway && giveawayDoc.dataValues.owner !== msg.author.id) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "Only the giveaway owner may end this giveaway.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
+			if (!giveawayDoc.dataValues.status) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "Giveaway has already been ended.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
 			let participants = await GiveawayParticipants.findAll({ where: { id: giveawayID, serverID: msg.guild.id } });
 			if (!participants[0]) {
-				giveawayDoc.set({ status: false });
-				giveawayDoc.save();
-				// TODO: Figure out how to edit documents
+				await giveawayDoc.set({ status: false });
+				await giveawayDoc.save();
+				await giveawayDoc.destroy({ where: { id: giveawayID, serverID: msg.guild.id } });
+
+				return msg.channel.send({
+					embed: {
+						color: 0x00FF00,
+						title: ":tada: Giveaway over!",
+						description: "No winner was picked as nobody entered :sad:.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
+			let winner = participants[Math.floor(Math.random() * participants.length)];
+			msg.channel.send({
+				embed: {
+					color: 0x00FF00,
+					title: ":tada: Giveaway over!",
+					fields: [{
+						name: `Giveaway Name`,
+						value: giveawayDoc.dataValues.title,
+					},
+					{
+						name: "Entry Count",
+						value: `${participants.length}`,
+					},
+					{
+						name: "Winner",
+						value: `${msg.guild.members.get(winner.dataValues.userID).toString() || "invalid-user#0001"}`,
+					}],
+					footer: {
+						text: require("../../package.json").version,
+					},
+				},
+			});
+			if (giveawayDoc.dataValues.winMsg) {
+				await giveawayDoc.set({ status: false, allowReroll: false });
+				await giveawayDoc.save();
+				return client.users.get(winner.dataValues.userID).send({
+					embed: {
+						color: 0x00FF00,
+						title: ":tada: Congratulations!",
+						description: `You've just won a giveaway in **${msg.guild.name}**!`,
+						fields: [{
+							name: "Giveaway Name",
+							value: giveawayDoc.dataValues.title,
+						},
+						{
+							name: "Entry Count",
+							value: `${participants.length}`,
+						},
+						{
+							name: "Prize",
+							value: giveawayDoc.dataValues.winMsg,
+						}],
+					},
+				}).catch(_ => {
+					msg.channel.send("I failed to DM the user with their prize.");
+				});
+			}
+			await giveawayDoc.set({ status: false, allowReroll: true, winner: winner.dataValues.userID });
+			await giveawayDoc.save();
+			setTimeout(async() => {
+				await Giveaways.destroy({ where: { id: giveawayID } });
+				await GiveawayParticipants.destroy({ where: { giveawayID: giveawayID, guildID: msg.guild.id } });
+			}, 300000);
+			break;
+		}
+		case "reroll": {
+			let giveawayID = suffix.split(" ")[1];
+			if (!giveawayID) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: "Voltus",
+						description: "No giveaway ID specified.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+			let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
+			if ((!doc || doc.dataValues.level !== 2) && !maintainers.includes(msg.author.id)) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "You do not have permission to execute this command.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+			let giveawayDoc = await Giveaways.findOne({ where: { id: giveawayID, serverID: msg.guild.id } });
+			if (!giveawayDoc) {
 				return msg.channel.send({
 					embed: {
 						color: 0xFF0000,
@@ -289,8 +432,111 @@ module.exports = async(client, msg, suffix) => {
 				});
 			}
 
+			if (serverDoc.dataValues.ownerEndsGiveaway && giveawayDoc.dataValues.owner !== msg.author.id) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "Only the giveaway owner may reroll this giveaway.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
+			if (!giveawayDoc.dataValues.allowReroll) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "This giveaway cannot be rerolled.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+			let participants = await GiveawayParticipants.findAll({ where: { id: giveawayID, serverID: msg.guild.id } });
+			let winner = participants[Math.floor(Math.random() * participants.length)];
+			msg.channel.send({
+				embed: {
+					color: 0x00FF00,
+					title: ":tada: Giveaway over!",
+					fields: [{
+						name: `Giveaway Name`,
+						value: giveawayDoc.dataValues.title,
+					},
+					{
+						name: "Entry Count",
+						value: `${participants.length}`,
+					},
+					{
+						name: "Winner",
+						value: `${msg.guild.members.get(winner.dataValues.userID).toString() || "invalid-user#0001"}`,
+					}],
+					footer: {
+						text: require("../../package.json").version,
+					},
+				},
+			});
+			await giveawayDoc.set({ status: false, allowReroll: true, winner: winner.dataValues.userID });
+			await giveawayDoc.save();
 			break;
-			// TODO: Finish this
+		}
+		case "leave": {
+			let giveawayID = suffix.split(" ")[1];
+			if (!giveawayID) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: "Voltus",
+						description: "No giveaway ID specified.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+			let giveawayDoc = await Giveaways.findOne({ where: { id: giveawayID, serverID: msg.guild.id } });
+			if (!giveawayDoc) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "Giveaway could not be found.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
+			let particpantDoc = await GiveawayParticipants.findOne({ where: { userID: msg.author.id, giveawayID, guildID: msg.guild.id } });
+			if (!particpantDoc) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "You are not a participant of this giveaway.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
+			await GiveawayParticipants.destroy({ where: { userID: msg.author.id, giveawayID, guildID: msg.guild.id } });
+			msg.channel.send({
+				embed: {
+					color: 0x00FF00,
+					title: "Voltus",
+					description: `You have left giveaway ID: ${giveawayID}`,
+					footer: {
+						text: require("../../package.json").version,
+					},
+				},
+			});
 		}
 	}
 };
