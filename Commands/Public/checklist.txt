@@ -1,11 +1,7 @@
 ---Moderation---
 - Mute
 - Unmute
-- Remove Strike
 - Nuke
 
 ---Fun---
 - EVERYTHING
-
----Util---
-- Giveaway
