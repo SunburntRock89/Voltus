@@ -114,3 +114,9 @@ module.exports = async(client, msg, suffix) => {
 		await nukeFunc();
 	}
 };
+module.exports.info = {
+	name: "Nuke",
+	description: "Allows you to bulk delete messages.",
+	level: 2,
+	pack: "Moderation",
+};

@@ -44,6 +44,7 @@ module.exports = async(client, msg, suffix) => {
 	}
 
 	let toCheck = suffix.split(" ")[0].toLowerCase();
+	if (toCheck === "join") toCheck === "enroll";
 	switch (toCheck) {
 		case "start": {
 			let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
@@ -219,7 +220,20 @@ module.exports = async(client, msg, suffix) => {
 				});
 			}
 
-			let participantDoc = await GiveawayParticipants.findOne({ where: { user: msg.author.id, serverID: msg.guild.id } });
+			if (giveawayDoc.dataValues.owner === msg.author.id) {
+				return msg.channel.send({
+					embed: {
+						color: 0xFF0000,
+						title: ":x: Error!",
+						description: "You cannot join a giveaway that you own.",
+						footer: {
+							text: require("../../package.json").version,
+						},
+					},
+				});
+			}
+
+			let participantDoc = await GiveawayParticipants.findOne({ where: { userID: msg.author.id, guildID: msg.guild.id } });
 			if (participantDoc) {
 				return msg.channel.send({
 					embed: {
@@ -318,7 +332,7 @@ module.exports = async(client, msg, suffix) => {
 				});
 			}
 
-			let participants = await GiveawayParticipants.findAll({ where: { id: giveawayID, serverID: msg.guild.id } });
+			let participants = await GiveawayParticipants.findAll({ where: { id: giveawayID, guildID: msg.guild.id } });
 			if (!participants[0]) {
 				await giveawayDoc.set({ status: false });
 				await giveawayDoc.save();
@@ -328,7 +342,7 @@ module.exports = async(client, msg, suffix) => {
 					embed: {
 						color: 0x00FF00,
 						title: ":tada: Giveaway over!",
-						description: "No winner was picked as nobody entered :sad:.",
+						description: "No winner was picked as nobody entered :frowning:.",
 						footer: {
 							text: require("../../package.json").version,
 						},
@@ -532,6 +546,43 @@ module.exports = async(client, msg, suffix) => {
 					color: 0x00FF00,
 					title: "Voltus",
 					description: `You have left giveaway ID: ${giveawayID}`,
+					footer: {
+						text: require("../../package.json").version,
+					},
+				},
+			});
+			break;
+		}
+		default: {
+			return msg.channel.send({
+				embed: {
+					color: 0x7452A2,
+					title: "Voltus",
+					description: "Invalid option, to continue, please rerun the command using one of the following arguments.",
+					fields: [{
+						name: "Start",
+						value: "Allows you to start a giveaway. Requires admin level 2.",
+					},
+					{
+						name: "Details",
+						value: "Lets you view the details of the giveaway.",
+					},
+					{
+						name: "Enroll",
+						value: "Lets users enroll in giveaways.",
+					},
+					{
+						name: "End",
+						value: `Allows ${serverDoc.dataValues.ownerEndsGiveaway ? `the giveaway owner` : `an admin`} to end a giveaway and choose a winner.`,
+					},
+					{
+						name: "Reroll",
+						value: "Allows you to repick the giveaway winner. Cannot be ran with a giveaway message.",
+					},
+					{
+						name: "Leave",
+						value: "Allows a user to leave the giveaway.",
+					}],
 					footer: {
 						text: require("../../package.json").version,
 					},
