@@ -102,6 +102,20 @@ module.exports = async(client, msg, suffix) => {
 			},
 		},
 	});
+	try {
+		member.send({
+			embed: {
+				color: 0xFF0000,
+				title: ":exclamation: Uh oh!",
+				description: `You've just been strike in **${msg.guild.name}** with ${reason == "No reason" ? "no reason." : `reason: **${reason}**`}`,
+				footer: {
+					text: `You now have ${msg.guild.members.size} members.`,
+				},
+			},
+		});
+	} catch (_) {
+		// Ignore
+	}
 };
 
 module.exports.info = {

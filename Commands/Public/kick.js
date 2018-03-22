@@ -83,6 +83,20 @@ module.exports = async(client, msg, suffix) => {
 
 	const kickFunc = async() => {
 		try {
+			member.send({
+				embed: {
+					color: 0xFF0000,
+					title: ":exclamation: Uh oh!",
+					description: `You've just been kicked from **${msg.guild.name}** with ${reason == "No reason" ? "no reason." : `reason: **${reason}**`}`,
+					footer: {
+						text: `You now have ${msg.guild.members.size} members.`,
+					},
+				},
+			});
+		} catch (_) {
+			// Ignore
+		}
+		try {
 			await member.kick(reason);
 		} catch (err) {
 			return msg.channel.send({

@@ -65,6 +65,11 @@ module.exports = async sequelize => {
 			defaultValue: false,
 			allowNull: false,
 		},
+		nukeLimit: {
+			type: Sequelize.INTEGER,
+			defaultValue: 100,
+			allowNull: false,
+		},
 	}, {
 		timestamps: false,
 	});
