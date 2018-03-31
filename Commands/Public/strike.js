@@ -3,7 +3,7 @@ const randomstring = require("randomstring");
 const { maintainers } = require("../../Configuration/config.json");
 
 module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
+	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
 	if (!doc && !maintainers.includes(msg.author.id)) {
 		return msg.channel.send({
 			embed: {

@@ -3,7 +3,7 @@ module.exports = async(client, guild) => {
 	for (let m of guild.members) {
 		if (m[1].hasPermission("ADMINSITRATOR") && !m[1].user.bot) {
 			await Admins.create({
-				id: m[1].id,
+				userID: m[1].id,
 				serverID: guild.id,
 				level: 3,
 			});

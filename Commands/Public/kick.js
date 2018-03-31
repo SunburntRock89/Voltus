@@ -1,8 +1,8 @@
 const { maintainers } = require("../../Configuration/config.json");
 
 module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
-	if ((!doc || doc.dataValues.level !== 2) && !maintainers.includes(msg.author.id)) {
+	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
+	if ((!doc || doc.dataValues.level !== 2) && !maintainers.includes(msg.author.id) && !msg.member.hasPermission(["ADMINISTRATOR", "MANAGE_GUILD"])) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,

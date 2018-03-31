@@ -1,7 +1,7 @@
 const { maintainers } = require("../../Configuration/config.json");
 
 module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
+	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
 	if (!doc && !maintainers.includes(msg.author.id)) {
 		return msg.channel.send({
 			embed: {
@@ -34,6 +34,19 @@ module.exports = async(client, msg, suffix) => {
 		if (!sDoc) {
 			canContinue = false;
 			failedIDs.push(i);
+		}
+		if (sDoc.dataValues.offender === msg.author.id) {
+			canContinue = false;
+			return msg.channel.send({
+				embed: {
+					color: 0xFF0000,
+					title: ":x: Error!",
+					description: "You cannot remove your own strikes.",
+					footer: {
+						text: require("../../package.json").version,
+					},
+				},
+			});
 		}
 	}
 	if (failedIDs[0] && !canContinue) {

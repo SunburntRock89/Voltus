@@ -1,7 +1,7 @@
 const { maintainers } = require("../../Configuration/config.json");
 
 module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, id: msg.author.id } });
+	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
 	if (!doc && !maintainers.includes(msg.author.id)) {
 		return msg.channel.send({
 			embed: {
@@ -106,6 +106,23 @@ module.exports = async(client, msg, suffix) => {
 					});
 				}
 				case "yes": {
+					let admins = await Admins.findAll({ where: { guildID: msg.guild.id } });
+					for (let i of admins) {
+						try {
+							client.users.get(i.userID).send({
+								embed: {
+									color: 0xFF0000,
+									title: ":exclamation: Warning!",
+									description: `**${msg.author.name}** has just nuked **${suffix}** messages in **${msg.channel.name}** of **${msg.guild.name}**`,
+									footer: {
+										text: require("../../package.json").version,
+									},
+								},
+							});
+						} catch (_) {
+							// Ignore
+						}
+					}
 					return nukeFunc();
 				}
 			}

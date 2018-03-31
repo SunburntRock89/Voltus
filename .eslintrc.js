@@ -105,6 +105,7 @@ module.exports = {
 		"unicode-bom": "error",
 		"arrow-body-style": "error",
 		"arrow-parens": ["error", "as-needed"],
+		// ^^^ Was causing issues in config.js
 		"arrow-spacing": "error",
 		"no-duplicate-imports": "error",
 		"no-useless-computed-key": "error",

@@ -9,65 +9,111 @@ module.exports = async sequelize => {
 	await connection.close();
 
 	const ServerConfigs = sequelize.define("ServerConfigs", {
+		// Server ID
 		id: {
 			type: Sequelize.STRING,
 			allowNull: false,
 			primaryKey: true,
 		},
+		// Prefix
 		prefix: {
 			type: Sequelize.STRING(10),
 			allowNull: true,
 			defaultValue: "-",
 		},
+		// Mute command enabled
 		muteEnabled: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
 			allowNull: false,
 		},
+		// Mute role
 		muteRole: {
 			type: Sequelize.STRING,
 			allowNull: true,
 		},
+		// New member message enabled
 		newMemberEnabled: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
 			allowNull: false,
 		},
+		// New member message channel
 		newMemberChannel: {
 			type: Sequelize.STRING,
 			allowNull: true,
 		},
+		// New member message
+		newMemberMessage: {
+			type: Sequelize.STRING,
+			allowNull: false,
+			defaultValue: "Please welcome @mention to **@guild**!",
+		},
+		// Agree enabled
 		agreeEnabled: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
 			allowNull: false,
 		},
+		// Agree channel
 		agreeChannel: {
 			type: Sequelize.STRING,
 			allowNull: true,
 		},
+		// Agree role
 		agreeRole: {
 			type: Sequelize.STRING,
 			allowNull: true,
 		},
+		// Are you sure you want to kick?
 		kickConfirms: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: true,
 			allowNull: false,
 		},
+		// Are you sure you want to ban?
 		banConfirms: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: true,
 			allowNull: false,
 		},
+		// If only the giveaway owner can end giveaways
 		ownerEndsGiveaway: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
 			allowNull: false,
 		},
+		// Nuke max message count
 		nukeLimit: {
 			type: Sequelize.INTEGER,
 			defaultValue: 100,
+			allowNull: false,
+		},
+		// IP Filter enabled
+		ipFilter: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: true,
+			allowNull: false,
+		},
+		// Should the IP filter strike?
+		ipFilterStrike: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
+		// Raid Mode enabled
+		raidMode: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
+
+		// Packs
+
+		// Moderation Pack enabled
+		moderationEnabled: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: true,
 			allowNull: false,
 		},
 	}, {
@@ -97,14 +143,13 @@ module.exports = async sequelize => {
 			allowNull: true,
 		},
 	}, {
-		timestamps: false,
+		timestamps: true,
 	});
 
 	const Admins = sequelize.define("Admins", {
-		id: {
+		userID: {
 			type: Sequelize.STRING,
 			allowNull: true,
-			primaryKey: true,
 		},
 		/* How admin levels work
 			1: Strike
@@ -126,7 +171,7 @@ module.exports = async sequelize => {
 	const Giveaways = sequelize.define("Giveaways", {
 		id: {
 			type: Sequelize.STRING,
-			allowNull: true,
+			allowNull: false,
 			primaryKey: true,
 		},
 		owner: {
