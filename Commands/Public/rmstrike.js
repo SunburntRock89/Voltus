@@ -76,3 +76,9 @@ module.exports = async(client, msg, suffix) => {
 		},
 	});
 };
+module.exports.info = {
+	name: "rmstrike",
+	description: "Allows you to remove a strike from a user.",
+	pack: "moderation",
+	level: 1,
+};

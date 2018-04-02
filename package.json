@@ -24,6 +24,7 @@
     "discord.js": "github:discordjs/discord.js",
     "erlpack": "github:discordapp/erlpack",
     "mysql2": "^1.5.2",
+    "pm2": "^2.10.2",
     "randomstring": "^1.1.5",
     "require-reload": "^0.2.2",
     "sequelize": "^4.37.1",

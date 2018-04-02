@@ -591,3 +591,9 @@ module.exports = async(client, msg, suffix) => {
 		}
 	}
 };
+module.exports.info = {
+	name: "Giveaway",
+	description: "Allows you to giveaway things.",
+	pack: "Util",
+	level: 1,
+};

@@ -330,6 +330,6 @@ module.exports = async(client, msg, suffix) => {
 module.exports.info = {
 	name: "Config",
 	description: "Allows you to change your server settings.",
-	pack: "Util",
+	pack: "Essential",
 	level: 4,
 };

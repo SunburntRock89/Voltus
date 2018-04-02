@@ -30,3 +30,9 @@ module.exports = async(client, msg, suffix) => {
 
 	// TODO: Finish
 };
+module.exports.info = {
+	name: "Mute",
+	description: "Allows you to remove a user's perms for typing in chat. -- MASSIVELY UNFINISHED",
+	pack: "moderation",
+	level: 1,
+};

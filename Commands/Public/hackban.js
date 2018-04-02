@@ -135,3 +135,9 @@ module.exports = async(client, msg, suffix) => {
 		await banFunc();
 	}
 };
+module.exports.info = {
+	name: "Hackban",
+	description: "Allows you to ban a user who is not in the server.",
+	pack: "Moderation",
+	level: 4,
+};
