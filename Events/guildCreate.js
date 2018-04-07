@@ -6,6 +6,7 @@ module.exports = async(client, guild) => {
 				userID: m[1].id,
 				serverID: guild.id,
 				level: 3,
+				type: "user",
 			});
 		}
 	}

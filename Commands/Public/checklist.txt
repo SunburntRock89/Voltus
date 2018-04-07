@@ -1,7 +1,8 @@
 ---Moderation---
-- Mute
-- Unmute
-- Nuke
+- Mute & Unmute -- AWAITING TESTING
 
 ---Fun---
 - EVERYTHING
+
+---Essential---
+- Config

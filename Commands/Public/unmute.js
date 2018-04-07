@@ -58,8 +58,8 @@ module.exports = async(client, msg, suffix) => {
 	if (serverDoc.dataValues.newMemberEnabled && serverDoc.dataValues.newMemberRole) newMemberRole = serverDoc.dataValues.newMemberRole || null;
 
 	try {
-		member.roles.add(muteRole);
-		if (newMemberRole) member.roles.remove(newMemberRole);
+		member.roles.remove(muteRole);
+		if (newMemberRole) member.roles.add(newMemberRole);
 	} catch (err) {
 		return msg.channel.send({
 			embed: {
@@ -72,25 +72,10 @@ module.exports = async(client, msg, suffix) => {
 			},
 		});
 	}
-
-	try {
-		member.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":exclamation: Uh oh!",
-				description: `You've been muted in **${msg.guild.name}**!`,
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	} catch (_) {
-		// Ignore
-	}
 };
 module.exports.info = {
-	name: "Mute",
-	description: "Allows you to remove a user's perms for typing in chat. -- MASSIVELY UNFINISHED",
+	name: "Unmute",
+	description: "Allows you to add back a user's permissions to type in channels.",
 	pack: "moderation",
 	level: 1,
 };

@@ -48,9 +48,21 @@ module.exports = async(client, msg, suffix) => {
 	const options = {};
 	options.moderation = {};
 
-	let collector, subcollector1, subcollector2;
-
-	const collectorFunc = async() => {
+	const mainmenu = async() => {
+		await mainEmbed.edit({
+			embed: {
+				color: 0x7452A2,
+				title: "Enter a number",
+				description: [`\`\`\`ini`,
+					`[1] Prefix ${options.prefix ? `[ ${options.prefix} ]` : ``}`,
+					`[2] Moderation ${Object.keys(options.moderation).length !== 0 ? `[ EDITED ]` : ``}`,
+					`[3] Admins`,
+					`\`\`\``,
+					`Type **s** to save || Type **e** to exit`,
+				].join("\n"),
+			},
+		});
+		let collector = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
 		collector.on("collect", async cmsg => {
 			await cmsg.delete();
 			switch (cmsg.content) {
@@ -62,6 +74,12 @@ module.exports = async(client, msg, suffix) => {
 				}
 				case "2": {
 					await submenu2();
+					await collector.stop();
+					collector = null;
+					break;
+				}
+				case "3": {
+					await submenu3();
 					await collector.stop();
 					collector = null;
 					break;
@@ -122,23 +140,6 @@ module.exports = async(client, msg, suffix) => {
 		});
 	};
 
-	const mainmenu = async() => {
-		await mainEmbed.edit({
-			embed: {
-				color: 0x7452A2,
-				title: "Enter a number",
-				description: [`\`\`\`ini`,
-					`[1] Prefix ${options.prefix ? `[ ${options.prefix} ]` : ``}`,
-					`[2] Moderation ${Object.keys(options.moderation).length !== 0 ? `[ EDITED ]` : ``}`,
-					`\`\`\``,
-					`Type **s** to save || Type **e** to exit`,
-				].join("\n"),
-			},
-		});
-		collector = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-		await collectorFunc();
-	};
-
 	await mainmenu();
 
 	const submenu1 = async() => {
@@ -148,7 +149,7 @@ module.exports = async(client, msg, suffix) => {
 				description: "Enter a new prefix. It must not be longer than 10 characters.",
 			},
 		});
-		subcollector1 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
+		let subcollector1 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
 		subcollector1.on("collect", async cmsg => {
 			await cmsg.delete();
 			if (cmsg.content.length > 10) {
@@ -181,7 +182,7 @@ module.exports = async(client, msg, suffix) => {
 				].join("\n"),
 			},
 		});
-		subcollector2 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
+		let subcollector2 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
 		subcollector2.on("collect", async cmsg => {
 			await cmsg.delete();
 			switch (cmsg.content) {
@@ -317,6 +318,96 @@ module.exports = async(client, msg, suffix) => {
 								`\`\`\`ini`,
 								`[1] Kick Confirmation ${options.moderation.kickConfirms ? `[ ${options.moderation.kickConfirms} ]` : ""}`,
 								`[2] Ban Confirmation ${options.moderation.banConfirms ? `[ ${options.moderation.banConfirms} ]` : ""}`,
+								`\`\`\``,
+								`Type **b** to go back || Type **e** to exit`,
+							].join("\n"),
+						},
+					});
+				}
+			}
+		});
+	};
+	const submenu3 = async() => {
+		await mainEmbed.edit({
+			embed: {
+				color: 0x7452A2,
+				title: "Enter a number",
+				description: [
+					`\`\`\`ini`,
+					`[1] Add User`,
+					`[2] Add Role`,
+					`[3] Change User Level`,
+					`[4] Change Role Level`,
+					`[5] Remove User`,
+					`[6] Remove Role`,
+					`\`\`\``,
+					`Type **b** to go back || Type **e** to exit`,
+				].join("\n"),
+			},
+		});
+		let subcollector3 = msg.channel.createMessageCollector(newmsg => newmsg.author.id === msg.author.id, { time: 30000 });
+		subcollector3.on("collect", async cmsg => {
+			switch (cmsg.content) {
+				case "1": {
+					await subcollector3.stop();
+					await mainEmbed.edit({
+						embed: {
+							color: 0x7452A2,
+							title: "Add an Admin User",
+							description: "Please specify a user to add.",
+						},
+					});
+					let subcollector31 = msg.channel.createMessageCollector(newmsg => newmsg.author.id, { time: 30000 });
+					subcollector31.on("collect", async c2msg => {
+						let member = await client.memberSearch(c2msg.content, msg.guild).catch(async() => {
+							await mainEmbed.edit({
+								embed: {
+									color: 0xFF0000,
+									title: "Add an Admin User",
+									description: "Could not find a user. Please specify a user to add.",
+								},
+							});
+						});
+						if (member) {
+							await subcollector31.stop();
+							await mainEmbed.edit({
+								embed: {
+									color: 0x7452A2,
+									title: "Add an Admin User",
+									description: "Please specify this user's level.",
+								},
+							});
+							let subcollector311 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id);
+							subcollector311.on("collect", async c3msg => {
+								let level = parseInt(c3msg.content);
+								if (level >= 5 || !isNaN) {
+									await mainEmbed.edit({
+										embed: {
+											color: 0xFF0000,
+											title: "Add an Admin User",
+											description: "Please specify this user's level. It must be a **number** that is **lower** than 5.",
+										},
+									});
+								}
+								// TODO: Finish this
+							});
+						}
+					});
+					break;
+				}
+				default: {
+					await mainEmbed.edit({
+						embed: {
+							color: 0xFF0000,
+							title: "Invalid option",
+							description: [
+								`\`\`\`ini`,
+								`[1] Add User`,
+								`[2] Add Role`,
+								`[3] Change User Level`,
+								`[4] Change Role Level`,
+								`[5] Remove User`,
+								`[6] Remove Role`,
 								`\`\`\``,
 								`Type **b** to go back || Type **e** to exit`,
 							].join("\n"),

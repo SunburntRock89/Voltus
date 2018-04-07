@@ -166,6 +166,10 @@ module.exports = async sequelize => {
 			type: Sequelize.INTEGER,
 			allowNull: true,
 		},
+		type: {
+			type: Sequelize.STRING,
+			allowNull: false,
+		},
 	});
 
 	const Giveaways = sequelize.define("Giveaways", {

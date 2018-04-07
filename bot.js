@@ -18,6 +18,7 @@ const sequelize = new Sequelize({
 
 	dialect: "mysql",
 	logging: false,
+	operatorsAliases: false,
 
 	pool: {
 		max: 5,
@@ -27,16 +28,14 @@ const sequelize = new Sequelize({
 	},
 });
 
-const commands = global.commands = [];
-
 let readytostart = false;
 client.once("ready", async() => {
 	if (!client.user.bot) {
 		await client.destroy();
-		console.log("Voltus is currently not running on a Discord Developer Bot account (https://discordapp.com/developers/applications/me). This is against Discord ToS and as such Voltus has automatically terminated its process.");
+		console.log("\u001B[31mVoltus is currently not running on a Discord Developer Bot account (https://discordapp.com/developers/applications/me). This is against Discord ToS and as such Voltus has automatically terminated its process.");
 		return process.reallyExit(1);
 	}
-	console.log(`Logged in as ${client.user.tag}`);
+	console.log(`\u001B[34mLogged in as ${client.user.tag}`);
 	if (client.guilds.size === 0) console.log(`This bot isn't in any servers! Invite it using ${await client.generateInvite(["ADMINISTRATOR"])}`);
 	client.user.setActivity("Starting...");
 	await require("./Database/init.js")(sequelize);
@@ -49,44 +48,10 @@ client.once("ready", async() => {
 			require("./Events/guildCreate")(client, g[1]);
 		}
 	}
-	for (let i of readdirSync("./Commands/Public")) {
-		try {
-			if (i === "checklist.txt") continue;
-			let c = require(`./Commands/Public/${i}`);
-			if (!c.info) throw new Error(`No command info provided.`);
-			c.info.dm = false;
-			commands.push(i.info);
-		} catch (err) {
-			console.error(`Error while initalizing command ${i}\n${err.stack}`);
-		}
-	}
-
-	for (let i of readdirSync("./Commands/DM")) {
-		try {
-			if (i === ".gitkeep") continue;
-			let c = require(`./Commands/DM/${i}`);
-			if (!c.info) throw new Error(`No command info provided.`);
-			c.info.dm = true;
-			commands.push(i.info);
-		} catch (err) {
-			console.error(`Error while initalizing command ${i}\n${err.stack}`);
-		}
-	}
-
-	for (let i of readdirSync("./Commands/Private")) {
-		try {
-			let c = require(`./Commands/Private/${i}`);
-			if (!c.info) throw new Error(`No command info provided.`);
-			c.info.dm = false;
-			commands.push(i.info);
-		} catch (err) {
-			console.error(`Error while initalizing command ${i}\n${err.stack}`);
-		}
-	}
 
 	readytostart = true;
 	client.user.setActivity(config.playingMessage.replace("{guilds}", client.guilds.size).replace("{users}", client.users.size));
-	console.log("Ready!");
+	console.log("\u001B[35mReady!\u001B[0m");
 });
 
 Object.assign(String.prototype, {
