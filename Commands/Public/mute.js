@@ -87,6 +87,16 @@ module.exports = async(client, msg, suffix) => {
 	} catch (_) {
 		// Ignore
 	}
+	return msg.channel.send({
+		embed: {
+			color: 0x00FF00,
+			title: "Success!",
+			description: `I have successfully muted **${member.user.tag}**.`,
+			footer: {
+				text: require("../../package.json").version,
+			},
+		},
+	});
 };
 module.exports.info = {
 	name: "Mute",
