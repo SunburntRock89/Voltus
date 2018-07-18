@@ -1,7 +1,7 @@
 const { Structures } = require("discord.js");
 
-module.exports = async() => {
-	Structures.extend("Guild", async Guild => {
+module.exports = () => {
+	Structures.extend("Guild", Guild => {
 		class VGuild extends Guild {
 			async memberSearch(string) {
 				let foundMember;
