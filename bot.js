@@ -36,7 +36,7 @@ const winston = global.winston = createLogger({
 const cmds = global.cmds = [];
 
 (async() => {
-	require("./Database/init.js")();
+	await require("./Database/init.js")();
 	// Event Handler
 	let events = await readdir("./Events");
 	for (let e of events) {
