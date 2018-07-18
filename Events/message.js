@@ -46,16 +46,18 @@ module.exports = async msg => {
 
 	// if (msg.guild && alias.pack !== "Essential" && !doc.dataValues[`${alias.pack}Enabled`]) return msg.channel.send(`The ${alias.pack} pack is not enabled in this server.`);
 
-	cmdFile(client, msg, suffix).catch(err => {
-		msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Unhandled Exception!",
-				description: `An error occured while executing command: ${cmd}\n\`\`\`js\n${err.stack}\`\`\``,
-				footer: {
-					text: "Please contact a maintainer",
+	if (cmdFile) {
+		cmdFile(client, msg, suffix).catch(err => {
+			msg.channel.send({
+				embed: {
+					color: 0xFF0000,
+					title: ":x: Unhandled Exception!",
+					description: `An error occured while executing command: ${cmd}\n\`\`\`js\n${err.stack}\`\`\``,
+					footer: {
+						text: "Please contact a maintainer",
+					},
 				},
-			},
+			});
 		});
-	});
+	}
 };
