@@ -1,6 +1,6 @@
 {
   "name": "voltus",
-  "version": "0.1 Alpha",
+  "version": "0.1.0",
   "description": "^^^ my name is",
   "main": "bot.js",
   "scripts": {
