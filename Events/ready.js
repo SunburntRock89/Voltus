@@ -13,7 +13,7 @@ module.exports = async() => {
 			doc = await ServerConfigs.findOne({ where: { id: g.id } });
 			if (!doc) throw new Error();
 		} catch (err) {
-			require("./guildCreate")(client, g);
+			require("./guildCreate")(g);
 		}
 	}
 	client.user.setActivity(config.playingMessage.replace("{guilds}", client.guilds.size).replace("{users}", client.users.size));

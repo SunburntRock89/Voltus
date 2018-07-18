@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "preInstall": "node ./Internals/winWarn.js",
-    "winInstall": "npm install -g --production windows-build-tools && npm install"
+    "windows-install": "npm install -g --production windows-build-tools && npm install"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "randomstring": "^1.1.5",
     "require-reload": "^0.2.2",
     "sequelize": "^4.37.1",
+    "snekfetch": "^4.0.4",
     "winston": "^3.0.0",
     "winston-daily-rotate-file": "^3.3.0",
     "zlib-sync": "^0.1.4"
