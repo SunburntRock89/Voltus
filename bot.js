@@ -39,7 +39,7 @@ const cmds = global.cmds = [];
 	await require("./Database/init.js")();
 
 	let structures = await readdir("./Structures");
-	for (let s of structures) if (s.endsWith(".js")) require("s")();
+	for (let s of structures) if (s.endsWith(".js")) require(`./Structures/${s}`)();
 	// Event Handler
 	let events = await readdir("./Events");
 	for (let e of events) {
