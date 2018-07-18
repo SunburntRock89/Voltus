@@ -6,7 +6,7 @@ module.exports = async(msg, doc) => {
 
 	const toCheck = msg.content.replace("-", ".").replace(". ", ".").replace(" .", ".")
 		.replace("­", "")
-		.replace(" ­");
+		.replace(" ­", "");
 	let everything = toCheck.split(" ");
 	let allIPs = [];
 	for (let i of everything) {
@@ -15,7 +15,7 @@ module.exports = async(msg, doc) => {
 	let ignored = [];
 	if (allIPs.length == 0) return;
 	for (let i of allIPs) {
-		if (i.startsWith("192.168" || "10.0")) {
+		if (i.startsWith("192.168" || "10.0" || "0")) {
 			ignored.push(i);
 			continue;
 		}
@@ -26,7 +26,7 @@ module.exports = async(msg, doc) => {
 			embed: {
 				color: 0xFF0000,
 				title: ":exclamation: IP Alert!",
-				description: `${msg.author.toString()} posted ${allIPs.length > 1 ? `**${allIPs.length - ignored.length}** IPs` : `an IP`} in this chat. I have removed it for safety reasons.`,
+				description: `${msg.author.toString()} posted ${allIPs.length > 1 ? `**${allIPs.length - ignored.length}** IPs` : `an IP`} in this chat. I have removed it for safety purposes.`,
 			},
 		});
 		if (doc.dataValues.ipFilterStrike) {
