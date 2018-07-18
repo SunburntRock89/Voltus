@@ -1,4 +1,4 @@
-const { maintainers } = require("../../Configuration/config.json");
+const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
 	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
@@ -81,4 +81,5 @@ module.exports.info = {
 	description: "Allows you to remove a strike from a user.",
 	pack: "moderation",
 	level: 1,
+	aliases: [],
 };

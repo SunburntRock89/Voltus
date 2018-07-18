@@ -55,4 +55,5 @@ module.exports.info = {
 	description: "Allows you to view a user's strikes.",
 	pack: "moderation",
 	level: 0,
+	aliases: [],
 };

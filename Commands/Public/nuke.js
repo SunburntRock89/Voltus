@@ -1,4 +1,4 @@
-const { maintainers } = require("../../Configuration/config.json");
+const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
 	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
@@ -136,4 +136,5 @@ module.exports.info = {
 	description: "Allows you to bulk delete messages.",
 	level: 2,
 	pack: "Moderation",
+	aliases: [],
 };

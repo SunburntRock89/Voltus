@@ -1,58 +1,60 @@
 const { Client } = require("discord.js");
-const { watch, readdirSync } = require("fs");
+const { readdir } = require("fs-nextra");
+const { createLogger, format, transports } = require("winston");
 
-const reload = require("require-reload")(require);
-const Sequelize = require("sequelize");
+const reload = global.reload = require("require-reload")(require);
+const Sequelize = global.Sequelize = require("sequelize");
+const DailyRotateFile = require("winston-daily-rotate-file");
 
-const auth = require("./Configuration/auth.json");
-const config = require("./Configuration/config.json");
+const auth = require("./Configuration/auth.js");
+const config = global.config = require("./Configuration/config.js");
 
-const client = new Client({
+const client = global.client = new Client({
 	disableEveryone: true,
 });
-const sequelize = new Sequelize({
-	host: auth.db.host,
-	database: auth.db.name,
-	username: auth.db.user,
-	password: auth.db.pwd,
 
-	dialect: "mysql",
-	logging: false,
-	operatorsAliases: false,
-
-	pool: {
-		max: 5,
-		min: 0,
-		acquire: 30000,
-		idle: 10000,
-	},
+const winston = global.winston = createLogger({
+	transports: [
+		new transports.Console({
+			colorize: true,
+		}),
+		new DailyRotateFile({
+			filename: "./Logs/Winston-Log-%DATE%.log",
+			datePattern: "YYY-MM-DD-HH",
+			zippedArchive: true,
+			maxFiles: "14d",
+			maxSize: "20m",
+		}),
+	],
+	exitOnError: false,
+	format: format.combine(
+		format.colorize(),
+		format.simple(),
+	),
 });
 
-let readytostart = false;
-client.once("ready", async() => {
-	if (!client.user.bot) {
-		await client.destroy();
-		console.log("\u001B[31mVoltus is currently not running on a Discord Developer Bot account (https://discordapp.com/developers/applications/me). This is against Discord ToS and as such Voltus has automatically terminated its process.");
-		return process.reallyExit(1);
-	}
-	console.log(`\u001B[34mLogged in as ${client.user.tag}`);
-	if (client.guilds.size === 0) console.log(`This bot isn't in any servers! Invite it using ${await client.generateInvite(["ADMINISTRATOR"])}`);
-	client.user.setActivity("Starting...");
-	await require("./Database/init.js")(sequelize);
-	for (let g of client.guilds) {
-		let doc;
-		try {
-			doc = await ServerConfigs.findOne({ where: { id: g[1].id } });
-			if (!doc) throw new Error();
-		} catch (err) {
-			require("./Events/guildCreate")(client, g[1]);
-		}
+const cmds = global.cmds = [];
+
+(async() => {
+	require("./Database/init.js")();
+	// Event Handler
+	let events = await readdir("./Events");
+	for (let e of events) {
+		let name = e.replace(".js", "");
+		client.on(name, (...args) => require(`./Events/${e}`)(...args));
 	}
 
-	readytostart = true;
-	client.user.setActivity(config.playingMessage.replace("{guilds}", client.guilds.size).replace("{users}", client.users.size));
-	console.log("\u001B[35mReady!\u001B[0m");
-});
+	// Command importer
+	let n = 0;
+	let dir = await readdir("./Commands/Public");
+	for (let d of dir) {
+		let command = reload(`./Commands/Public/${d}`);
+		command.info.aliases.push(d.split(".js")[0]);
+		cmds.push({ name: d.split(".js")[0], aliases: command.info.aliases, pack: command.info.pack });
+		n++;
+	}
+	winston.info(`[Command Loader] Loaded ${n} commands.`);
+})();
 
 Object.assign(String.prototype, {
 	escapeRegex() {
@@ -61,128 +63,14 @@ Object.assign(String.prototype, {
 	},
 });
 
-client.on("message", async msg => {
-	if (!readytostart) return;
-	let doc;
-	if (msg.guild) {
-		doc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
-		if (!doc) throw new Error("Something went hideously wrong with the server config document for ", msg.guild.id);
-	}
-	if (msg.guild && doc.dataValues.ipFilter) {
-		require("./Internals/ipFilter")(client, msg, doc);
-	}
-	if (msg.guild && !msg.content.startsWith(doc.dataValues.prefix) && !msg.content.startsWith(client.user)) return;
-	if (msg.author.bot) return;
-	let cmd, suffix;
-	if (msg.content.startsWith(doc.dataValues.prefix)) {
-		cmd = msg.content.split(" ")[0].trim().toLowerCase().replace(msg.guild ? doc.dataValues.prefix : "", "");
-		suffix = msg.content.split(" ").splice(1).join(" ")
-			.trim();
-	} else if (msg.content.startsWith(`${client.user} `)) {
-		cmd = msg.content.split(`${client.user} `)[1].trim().replace(client.user, "").split(" ")[0].trim();
-		suffix = msg.content.split(`${cmd} `)[1];
-	}
-
-	let cmdFile;
-	if (msg.channel.type === "dm") {
-		try {
-			cmdFile = reload(`./Commands/DM/${cmd}.js`);
-		} catch (_) {
-			return null;
-		}
-	} else if (config.maintainers.includes(msg.author.id)) {
-		try {
-			cmdFile = reload(`./Commands/Private/${cmd}.js`);
-		} catch (_) {
-			try {
-				cmdFile = reload(`./Commands/Public/${cmd}.js`);
-			} catch (__) {
-				return null;
-			}
-		}
-	} else {
-		try {
-			cmdFile = reload(`./Commands/Public/${cmd}.js`);
-		} catch (_) {
-			return null;
-		}
-	}
-	if (msg.guild && cmdFile.info.pack === "moderation" && !doc.dataValues.moderationEnabled) return msg.channel.send("The moderation pack is not enabled in this server.");
-	cmdFile(client, msg, suffix).catch(err => {
-		msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Unhandled Exception!",
-				description: `An error occured while executing command: ${cmd}\n\`\`\`js\n${err.stack}\`\`\``,
-				footer: {
-					text: "Please contact a maintainer",
-				},
-			},
-		});
-	});
-});
-
-client.memberSearch = async(string, guild) => new Promise((resolve, reject) => {
-	let foundMember;
-	string = string.trim();
-
-	if (string.startsWith("<@!")) {
-		foundMember = guild.members.get(string.slice(3, -1));
-	} else if (string.startsWith("<@")) {
-		foundMember = guild.members.get(string.slice(2, -1));
-	} else if (!isNaN(string) && new RegExp(/^\d+$/).test(string)) {
-		foundMember = guild.members.get(string);
-	} else if (string.startsWith("@")) {
-		string = string.slice(1);
-	}
-	if (string.lastIndexOf("#") === string.length - 5 && !isNaN(string.substring(string.lastIndexOf("#") + 1))) {
-		foundMember = guild.members.filter(member => member.user.username === string.substring(0, string.lastIndexOf("#") + 1))
-			.find(member => member.user.discriminator === string.substring(string.lastIndexOf("#") + 1));
-	}
-	if (!foundMember) {
-		foundMember = guild.members.find(member => member.user.username.toLowerCase() === string.toLowerCase());
-	}
-	if (!foundMember) {
-		foundMember = guild.members.find(member => member.nickname && member.nickname.toLowerCase() === string.toLowerCase());
-	}
-	if (foundMember) {
-		resolve(foundMember);
-	} else {
-		reject(new Error("Failed to find member"));
-	}
-});
-
-
-client.on("guildCreate", async guild => {
-	require("./Events/guildCreate")(client, guild);
-});
-
-client.on("guildMemberAdd", async member => {
-	let doc = await ServerConfigs.findOne({ where: { id: member.guild.id } });
-	if (!doc) throw new Error("Something went hideously wrong with the server config document for ", member.guild.id);
-
-	if (doc.dataValues.raidMode) return require("./Internals/raidModeguildMemberAdd")(client, member, doc);
-	if (doc.dataValues.newMemberEnabled) {
-		try {
-			member.guild.channels.get(doc.dataValues.newMemberChannel).send({
-				embed: {
-					color: 0x00FF00,
-					title: ":wave: Welcome!",
-					description: doc.dataValues.newMemberMessage.replace("@mention", member.toString())
-						.replace("@member", member.user.tag)
-						.replace("@id", member.id)
-						.replace("@guild", member.guild.name),
-					footer: {
-						text: require("../../package.json").version,
-					},
-				},
+client.login(require("./Configuration/auth.js").discord.token).catch(() => {
+	let interval = setInterval(() => {
+		client.login(require("./Configuration/auth.js").discord.token)
+			.then(() => {
+				clearInterval(interval);
+			})
+			.catch(() => {
+				winston.info("[Discord] Failed to connect. Retrying in 5 minutes...");
 			});
-		} catch (_) {
-			// Ignore
-		}
-	}
+	}, 300000);
 });
-
-process.on("unhandledRejection", (_, promise) => console.log(require("util").inspect(promise, null, 2)));
-
-client.login(auth.discord.token);

@@ -1,4 +1,4 @@
-module.exports = async(client, member, doc) => {
+module.exports = async(member, doc) => {
 	let admins = await Admins.findAll({ where: { serverID: member.guild.id } });
 	for (let i of admins) {
 		try {

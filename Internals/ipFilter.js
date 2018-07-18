@@ -1,6 +1,6 @@
 const randomstring = require("randomstring");
 
-module.exports = async(client, msg, doc) => {
+module.exports = async(msg, doc) => {
 	if (msg.author.id === client.user.id) return;
 	const regex = /(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/gm;
 

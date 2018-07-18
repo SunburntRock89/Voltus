@@ -1,4 +1,4 @@
-const { maintainers, version } = require("../../Configuration/config.json");
+const { maintainers, version } = require("../../Configuration/config.js");
 
 const { post } = require("snekfetch");
 

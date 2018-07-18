@@ -1,7 +1,7 @@
 const randomstring = require("randomstring");
 const moment = require("moment");
 
-const { maintainers } = require("../../Configuration/config.json");
+const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
 	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
@@ -596,4 +596,5 @@ module.exports.info = {
 	description: "Allows you to giveaway things.",
 	pack: "Util",
 	level: 1,
+	aliases: [],
 };

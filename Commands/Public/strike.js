@@ -1,6 +1,6 @@
 const randomstring = require("randomstring");
 
-const { maintainers } = require("../../Configuration/config.json");
+const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
 	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
@@ -123,4 +123,5 @@ module.exports.info = {
 	description: "Regan help me write a description for this",
 	pack: "moderation",
 	level: 1,
+	aliases: [],
 };

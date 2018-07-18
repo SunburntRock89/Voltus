@@ -58,5 +58,5 @@ typings/
 .env
 
 # Authentication and Tokens
-Configuration/auth.json
-Configuration/config.json
+Configuration/auth.js
+Configuration/config.js

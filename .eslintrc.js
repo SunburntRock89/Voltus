@@ -8,6 +8,12 @@ module.exports = {
 		node: true,
 	},
 	globals: {
+		client: true,
+		cmds: true,
+		config: true,
+		reload: true,
+		winston: true,
+		Sequelize: true,
 		ServerConfigs: true,
 		Strikes: true,
 		Admins: true,

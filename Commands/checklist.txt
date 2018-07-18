@@ -3,6 +3,7 @@
 
 ---Fun---
 - EVERYTHING
+- FNBR
 
 ---Essential---
 - Config
