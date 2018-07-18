@@ -1,7 +1,7 @@
 module.exports = async(client, msg, suffix) => {
 	let member;
 	try {
-		member = await client.memberSearch(suffix, msg.guild);
+		member = await msg.guild.memberSearch(suffix, msg.guild);
 	} catch (err) {
 		return msg.channel.send({
 			embed: {

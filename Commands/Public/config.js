@@ -359,7 +359,7 @@ module.exports = async(client, msg, suffix) => {
 					});
 					let subcollector31 = msg.channel.createMessageCollector(newmsg => newmsg.author.id, { time: 30000 });
 					subcollector31.on("collect", async c2msg => {
-						let member = await client.memberSearch(c2msg.content, msg.guild).catch(async() => {
+						let member = await msg.guild.memberSearch(c2msg.conten).catch(async() => {
 							await mainEmbed.edit({
 								embed: {
 									color: 0xFF0000,

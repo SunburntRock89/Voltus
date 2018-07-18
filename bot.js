@@ -37,6 +37,9 @@ const cmds = global.cmds = [];
 
 (async() => {
 	await require("./Database/init.js")();
+
+	let structures = await readdir("./Structures");
+	for (let s of structures) if (s.endsWith(".js")) require("s")();
 	// Event Handler
 	let events = await readdir("./Events");
 	for (let e of events) {
@@ -54,6 +57,8 @@ const cmds = global.cmds = [];
 		n++;
 	}
 	winston.info(`[Command Loader] Loaded ${n} commands.`);
+
+	login();
 })();
 
 Object.assign(String.prototype, {
@@ -63,7 +68,7 @@ Object.assign(String.prototype, {
 	},
 });
 
-client.login(require("./Configuration/auth.js").discord.token).catch(() => {
+const login = () => client.login(require("./Configuration/auth.js").discord.token).catch(() => {
 	let interval = setInterval(() => {
 		client.login(require("./Configuration/auth.js").discord.token)
 			.then(() => {

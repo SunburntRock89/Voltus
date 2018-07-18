@@ -15,7 +15,7 @@ module.exports = async(msg, doc) => {
 	let ignored = [];
 	if (allIPs.length == 0) return;
 	for (let i of allIPs) {
-		if (i.startsWith("192.168" || "10.0" || "0")) {
+		if (i.startsWith("192.168" || "10.0" || "0" || "127.0.0.1")) {
 			ignored.push(i);
 			continue;
 		}
