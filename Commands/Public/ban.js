@@ -30,13 +30,13 @@ module.exports = async(client, msg, suffix) => {
 
 	let member, reason;
 	if (suffix.indexOf("|") > -1 && suffix.length > 3) {
-		member = await msg.guild.memberSearch(suffix.substring(0, suffix.indexOf("|")).trim()).catch(() => {
+		member = await client.memberSearch(suffix.substring(0, suffix.indexOf("|")).trim(), msg.guild).catch(() => {
 			member = undefined;
 		});
 		reason = suffix.substring(suffix.indexOf("|") + 1).trim();
 	} else {
 		reason = "No reason";
-		member = await msg.guild.memberSearch(suffix).catch(() => {
+		member = await client.memberSearch(suffix, msg.guild).catch(() => {
 			member = undefined;
 		});
 	}

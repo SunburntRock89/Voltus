@@ -99,6 +99,25 @@ module.exports = async sequelize => {
 			allowNull: false,
 		},
 
+		// Starboard
+		starboardEnabled: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
+
+		starboardChannel: {
+			type: Sequelize.STRING,
+			defaultValue: false,
+			allowNull: false,
+		},
+		starboardCount: {
+			type: Sequelize.INTEGER,
+			defaultValue: false,
+			allowNull: false,
+		},
+
+
 		// Packs
 
 		// Moderation Pack enabled

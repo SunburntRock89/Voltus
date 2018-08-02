@@ -79,3 +79,32 @@ const login = () => client.login(require("./Configuration/auth.js").discord.toke
 			});
 	}, 300000);
 });
+
+client.memberSearch = async(string, guild) => new Promise((resolve, reject) => {
+	let foundMember;
+	string = string.trim();
+	if (string.startsWith("<@!")) {
+		foundMember = guild.members.get(string.slice(3, -1));
+	} else if (string.startsWith("<@")) {
+		foundMember = guild.members.get(string.slice(2, -1));
+	} else if (!isNaN(string) && new RegExp(/^\d+$/).test(string)) {
+		foundMember = guild.members.get(string);
+	} else if (string.startsWith("@")) {
+		string = string.slice(1);
+	}
+	if (string.lastIndexOf("#") === string.length - 5 && !isNaN(string.substring(string.lastIndexOf("#") + 1))) {
+		foundMember = guild.members.filter(member => member.user.username === string.substring(0, string.lastIndexOf("#") + 1))
+			.find(member => member.user.discriminator === string.substring(string.lastIndexOf("#") + 1));
+	}
+	if (!foundMember) {
+		foundMember = guild.members.find(member => member.user.username.toLowerCase() === string.toLowerCase());
+	}
+	if (!foundMember) {
+		foundMember = guild.members.find(member => member.nickname && member.nickname.toLowerCase() === string.toLowerCase());
+	}
+	if (foundMember) {
+		resolve(foundMember);
+	} else {
+		reject(new Error("Failed to find member"));
+	}
+});

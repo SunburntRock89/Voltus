@@ -1,6 +1,6 @@
 module.exports = async(member, doc) => {
-	let admins = await Admins.findAll({ where: { serverID: member.guild.id } });
-	for (let i of admins) {
+	let admins = member.guild.members.filter(m => m.hasPermission("ADMINISTRATOR"));
+	for (let i of admins.values()) {
 		try {
 			client.users.get(i.dataValues.userID).send({
 				color: 0xFF0000,
