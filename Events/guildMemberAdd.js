@@ -14,7 +14,7 @@ module.exports = async member => {
 						.replace("@id", member.id)
 						.replace("@guild", member.guild.name),
 					footer: {
-						text: require("../../package.json").version,
+						text: require("../package.json").version,
 					},
 				},
 			});
