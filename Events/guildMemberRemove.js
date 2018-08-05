@@ -2,7 +2,7 @@ module.exports = async member => {
 	let doc = await ServerConfigs.findOne({ where: { id: member.guild.id } });
 	if (!doc) throw new Error(`Something went hideously wrong with the server config document for ${member.guild.id}`);
 
-	if (doc.dataValues.raidMode) return require("./Internals/raidModeguildMemberRemove")(client, member, doc);
+	if (doc.dataValues.raidMode) return require("../Internals/raidModeguildMemberRemove")(client, member, doc);
 	if (doc.dataValues.leaveEnabled) {
 		try {
 			member.guild.channels.get(doc.dataValues.leaveChannel).send({

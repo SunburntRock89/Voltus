@@ -54,7 +54,7 @@ module.exports = async sequelize => {
 		leaveMessage: {
 			type: Sequelize.STRING,
 			allowNull: false,
-			defaultValue: "**@member** has left the server. :(",
+			defaultValue: "**@member** has left the server. :frowning:",
 		},
 		// Agree enabled
 		agreeEnabled: {
