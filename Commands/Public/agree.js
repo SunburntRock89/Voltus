@@ -18,14 +18,18 @@ module.exports = async(client, msg, suffix) => {
 
 	if (doc.dataValues.agreeChannel && doc.dataValues.agreeChannel !== msg.channel.id) return msg.reply("Agree cannot be used in this channel.");
 
-	let role = await msg.guild.roles.get(doc.dataValues.agreeRole)
-		.catch(() => msg.channel.send({
+	let role;
+	try {
+		role = await msg.guild.roles.get(doc.dataValues.agreeRole);
+	} catch (_) {
+		msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
-				description: "The role given to new members is incorrect.",
+				description: "The role given to new members is invalid.",
 			},
-		}));
+		});
+	}
 
 	if (role) msg.member.roles.add(role);
 };
