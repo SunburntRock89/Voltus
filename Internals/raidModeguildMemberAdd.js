@@ -2,7 +2,7 @@ module.exports = async(client, member, doc) => {
 	let admins = member.guild.members.filter(m => m.hasPermission("ADMINISTRATOR"));
 	for (let i of admins.values()) {
 		try {
-			client.users.get(i).send({
+			i.send({
 				color: 0xFF0000,
 				title: ":exclamation: Raid Mode",
 				description: `**${member.user.name}** has just joined **${member.guild.name}**`,

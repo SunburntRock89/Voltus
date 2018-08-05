@@ -2,7 +2,6 @@ module.exports = async(client, member, doc) => {
 	let admins = member.guild.members.filter(m => m.hasPermission("ADMINISTRATOR"));
 	for (let i of admins.values()) {
 		try {
-			console.log(i)
 			i.send({
 				color: 0xFF0000,
 				title: ":exclamation: Raid Mode",
