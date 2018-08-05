@@ -3,11 +3,13 @@ module.exports = async(client, member, doc) => {
 	for (let i of admins.values()) {
 		try {
 			i.send({
-				color: 0xFF0000,
-				title: ":exclamation: Raid Mode",
-				description: `**${member.user.name}** has just joined **${member.guild.name}**`,
-				footer: {
-					text: require("../package.json").version,
+				embed: {
+					color: 0xFF0000,
+					title: ":exclamation: Raid Mode",
+					description: `**${member.user.name}** has just joined **${member.guild.name}**`,
+					footer: {
+						text: require("../package.json").version,
+					},
 				},
 			});
 		} catch (_) {
