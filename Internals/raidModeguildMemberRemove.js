@@ -6,14 +6,14 @@ module.exports = async(client, member, doc) => {
 				embed: {
 					color: 0xFF0000,
 					title: ":exclamation: Raid Mode",
-					description: `**${member.user.name}** has just left **${member.guild.name}**`,
+					description: `**${member.user.tag}** has just left **${member.guild.name}**`,
 					footer: {
 						text: require("../package.json").version,
 					},
 				},
 			});
 		} catch (_) {
-			winston.error(_);
+			// Ignore
 		}
 	}
 };
