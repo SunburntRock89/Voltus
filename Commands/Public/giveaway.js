@@ -5,7 +5,18 @@ const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
 	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
-
+	if (!serverDoc) {
+		return msg.channel.send({
+			embed: {
+				color: 0xFF0000,
+				title: ":x: Error!",
+				description: "An unexpected database error has occured.",
+				footer: {
+					text: "Please contact SunburntRock89#6617 for support.",
+				},
+			},
+		});
+	}
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
