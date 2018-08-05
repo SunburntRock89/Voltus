@@ -17,8 +17,7 @@ module.exports = async member => {
 						text: require("../package.json").version,
 					},
 				},
-			}).then(m => console.log(m))
-				.catch(e => console.error(e))
+			});
 		} catch (_) {
 			winston.error(_);
 		}
