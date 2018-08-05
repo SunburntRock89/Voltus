@@ -29,3 +29,10 @@ module.exports = async(client, msg, suffix) => {
 
 	if (role) msg.member.roles.add(role);
 };
+module.exports.info = {
+	name: "Agree",
+	description: "Allows a user to agree to the rules.",
+	pack: "utility",
+	level: 0,
+	aliases: [],
+};
