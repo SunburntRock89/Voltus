@@ -1,4 +1,4 @@
-module.exports = async(member, doc) => {
+module.exports = async(client, member, doc) => {
 	let admins = member.guild.members.filter(m => m.hasPermission("ADMINISTRATOR"));
 	for (let i of admins.values()) {
 		try {
