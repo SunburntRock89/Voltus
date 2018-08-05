@@ -19,7 +19,7 @@ module.exports = async member => {
 				},
 			});
 		} catch (_) {
-			winston.error(_);
+			// Ignore
 		}
 	}
 };
