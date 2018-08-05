@@ -40,6 +40,22 @@ module.exports = async sequelize => {
 			allowNull: false,
 			defaultValue: "Please welcome @mention to **@guild**!",
 		},
+		leaveEnabled: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
+		// New member message channel
+		leaveChannel: {
+			type: Sequelize.STRING,
+			allowNull: true,
+		},
+		// New member message
+		leaveMessage: {
+			type: Sequelize.STRING,
+			allowNull: false,
+			defaultValue: "**@member** has left the server. :(",
+		},
 		// Agree enabled
 		agreeEnabled: {
 			type: Sequelize.BOOLEAN,
