@@ -11,12 +11,16 @@ module.exports = async guild => {
 		}
 	}
 
-	guild.owner.send({
-		embed: {
-			color: 0x7452A2,
-			title: ":wave: Hey there!",
-			description: `I've just been added to **${guild.name}**, a server you own! To get started, run \`${doc[0].dataValues.prefix}config\``,
-		},
-	});
+	try {
+		await guild.owner.send({
+			embed: {
+				color: 0x7452A2,
+				title: ":wave: Hey there!",
+				description: `I've just been added to **${guild.name}**, a server you own! To get started, run \`${doc[0].dataValues.prefix}config\``,
+			},
+		});
+	} catch (_) {
+		// Ignore
+	}
 	winston.info(`[Discord] Joined server: ${guild.name}. ID: ${guild.id}`);
 };

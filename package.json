@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/SunburntRock89/Codename-Jeffery.git"
   },
-  "author": "Banging Dev Team",
+  "author": "SunburntRock89",
   "license": "SEE LICENSE IN LICENSE",
   "readme": "SEE README",
   "bugs": {
@@ -24,7 +24,7 @@
     "discord.js": "github:discordjs/discord.js",
     "erlpack": "github:discordapp/erlpack",
     "fs-nextra": "^0.3.4",
-    "mysql2": "^1.5.2",
+    "pg": "^7.4.3",
     "randomstring": "^1.1.5",
     "require-reload": "^0.2.2",
     "sequelize": "^4.37.1",

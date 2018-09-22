@@ -5,7 +5,7 @@ module.exports = async member => {
 	if (doc.dataValues.raidMode) return require("../Internals/raidModeguildMemberRemove")(client, member, doc);
 	if (doc.dataValues.leaveEnabled) {
 		try {
-			member.guild.channels.get(doc.dataValues.leaveChannel).send({
+			await member.guild.channels.get(doc.dataValues.leaveChannel).send({
 				embed: {
 					color: 0x7452A2,
 					title: "Voltus",

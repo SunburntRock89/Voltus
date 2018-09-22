@@ -5,7 +5,7 @@ module.exports = async member => {
 	if (doc.dataValues.raidMode) return require("../Internals/raidModeguildMemberAdd.js")(client, member, doc);
 	if (doc.dataValues.newMemberEnabled) {
 		try {
-			member.guild.channels.get(doc.dataValues.newMemberChannel).send({
+			await member.guild.channels.get(doc.dataValues.newMemberChannel).send({
 				embed: {
 					color: 0x00FF00,
 					title: ":wave: Welcome!",

@@ -129,7 +129,7 @@ module.exports = async sequelize => {
 		},
 		starboardCount: {
 			type: Sequelize.INTEGER,
-			defaultValue: false,
+			defaultValue: 5,
 			allowNull: false,
 		},
 
