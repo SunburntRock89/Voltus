@@ -23,7 +23,7 @@ const sequelize = new Sequelize({
 module.exports = async() => {
 	sequelize.authenticate()
 		.then(() => winston.info("[Database] Successfully connected."))
-		.catch(err => winston.err("[Database] Failed to connect: ", err.stack));
+		.catch(err => winston.error("[Database] Failed to connect: ", err.stack));
 	let schemas = await readdir("./Database/Schemas");
 	for (let s of schemas) require(`./Schemas/${s}`)(sequelize);
 	return sequelize;
