@@ -1,29 +1,12 @@
 const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if ((!doc || doc.dataValues.level !== 4) && !maintainers.includes(msg.author.id) && !msg.member.hasPermission(["ADMINISTRATOR", "MANAGE_GUILD"])) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -43,9 +26,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Not a valid user!",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -66,9 +46,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "There are no users banned from this server!",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -80,14 +57,23 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "This user is not banned!",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
 
 	await msg.guild.members.unban(userBan.user, reason);
+	modLogger.log({
+		type: "Unban",
+		moderator: {
+			id: msg.author.id,
+			tag: msg.user.tag,
+		},
+		user: {
+			id: user.id,
+			tag: user.id,
+		},
+		reason,
+	});
 	msg.channel.send({
 		embed: {
 			color: 0x00FF00,

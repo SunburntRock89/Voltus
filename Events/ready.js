@@ -10,7 +10,7 @@ module.exports = async() => {
 	for (let g of client.guilds.values()) {
 		let doc;
 		try {
-			doc = await ServerConfigs.findOne({ where: { id: g.id } });
+			doc = await ServerConfigs.findOne({ where: { id: g.id }, cache: false });
 			if (!doc) throw new Error();
 		} catch (err) {
 			require("./guildCreate")(g);

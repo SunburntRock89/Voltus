@@ -8,9 +8,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Could not resolve a member.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -22,9 +19,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0x7452A2,
 				title: "Voltus",
 				description: "This user has no strikes!",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}

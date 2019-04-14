@@ -1,29 +1,12 @@
 const { maintainers } = require("../../Configuration/config.js");
 
-module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if ((!doc || doc.dataValues.level !== 4) && !maintainers.includes(msg.author.id) && !msg.member.hasPermission(["ADMINISTRATOR", "MANAGE_GUILD"])) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
+module.exports = async(client, msg, suffix, serverDoc) => {
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -43,9 +26,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Not a valid user!.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -63,9 +43,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "This user is in the server! Please use the **ban** command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -73,15 +50,24 @@ module.exports = async(client, msg, suffix) => {
 	let banFunc = async() => {
 		try {
 			await msg.guild.members.ban(user, { days: 7, reason });
+			modLogger.log({
+				type: "Hackban",
+				moderator: {
+					id: msg.author.id,
+					tag: msg.user.tag,
+				},
+				user: {
+					id: user,
+					name: user,
+				},
+				reason,
+			});
 		} catch (err) {
 			return msg.channel.send({
 				embed: {
 					color: 0xFF0000,
 					title: ":x: Error!",
 					description: "This user does not exist!",
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 		}
@@ -97,7 +83,6 @@ module.exports = async(client, msg, suffix) => {
 		});
 	};
 
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
 	if (serverDoc.dataValues.banConfirms) {
 		msg.channel.send({
 			embed: {
@@ -122,9 +107,6 @@ module.exports = async(client, msg, suffix) => {
 							color: 0x7452A2,
 							title: "Voltus",
 							description: "Ban cancelled.",
-							footer: {
-								text: require("../../package.json").version,
-							},
 						},
 					});
 					break;

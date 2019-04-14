@@ -1,9 +1,10 @@
----Moderation---
-- Mute & Unmute -- AWAITING TESTING
-
 ---Fun---
 - EVERYTHING
 - FNBR
 
 ---Essential---
 - Config
+
+--Util--
+-Fix giveaway
+-on server leave mute retainment thing

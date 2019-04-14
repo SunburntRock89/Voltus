@@ -1,5 +1,5 @@
 module.exports = async sequelize => {
-	const Strikes = global.Strikes = sequelize.define("Strikes", {
+	const databaseModel = sequelize.define("Strikes", {
 		id: {
 			type: Sequelize.STRING,
 			allowNull: false,
@@ -25,5 +25,7 @@ module.exports = async sequelize => {
 		timestamps: true,
 	});
 
-	await Strikes.sync();
+	await databaseModel.sync();
+
+	const Strikes = global.Strikes = new cache(databaseModel);
 };

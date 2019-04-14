@@ -1,5 +1,5 @@
 module.exports = async sequelize => {
-	const ServerConfigs = global.ServerConfigs = sequelize.define("ServerConfigs", {
+	const databaseModel = sequelize.define("ServerConfigs", {
 		// Server ID
 		id: {
 			type: Sequelize.STRING,
@@ -153,5 +153,7 @@ module.exports = async sequelize => {
 		timestamps: false,
 	});
 
-	await ServerConfigs.sync();
+	await databaseModel.sync();
+
+	const ServerConfigs = global.ServerConfigs = new cache(databaseModel);
 };

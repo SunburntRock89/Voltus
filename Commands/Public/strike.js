@@ -3,29 +3,12 @@ const randomstring = require("randomstring");
 const { maintainers } = require("../../Configuration/config.js");
 
 module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if (!doc && !maintainers.includes(msg.author.id)) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -49,9 +32,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Could not resolve a member.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -62,23 +42,17 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "This user cannot be striked.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
 
 	let memberDoc = await Admins.findOne({ where: { serverID: msg.guild.id, id: member.id } });
-	if (memberDoc && memberDoc.dataValues.level >= doc.dataValues.level) {
+	if (memberDoc && memberDoc.dataValues.level >= msg.author.adminLevel) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "You cannot strike a member with the same or higher admin level than you.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -88,6 +62,18 @@ module.exports = async(client, msg, suffix) => {
 		guild: msg.guild.id,
 		offender: member.id,
 		creator: msg.author.id,
+		reason,
+	});
+	modLogger.log({
+		type: "Strike",
+		moderator: {
+			id: msg.author.id,
+			tag: msg.user.tag,
+		},
+		user: {
+			id: member.id,
+			tag: member.tag,
+		},
 		reason,
 	});
 

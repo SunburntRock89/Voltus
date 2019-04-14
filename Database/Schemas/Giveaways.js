@@ -1,5 +1,5 @@
 module.exports = async sequelize => {
-	const Giveaways = global.Giveaways = sequelize.define("Giveaways", {
+	const databaseModel = sequelize.define("Giveaways", {
 		id: {
 			type: Sequelize.STRING,
 			allowNull: false,
@@ -29,6 +29,10 @@ module.exports = async sequelize => {
 			type: Sequelize.BOOLEAN,
 			defaultValue: true,
 		},
+		enrolled: {
+			type: Sequelize.ARRAY(Sequelize.STRING),
+			defaultValue: [],
+		},
 		allowReroll: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,
@@ -39,5 +43,7 @@ module.exports = async sequelize => {
 		},
 	});
 
-	await Giveaways.sync();
+	await databaseModel.sync();
+
+	const Giveaways = global.Giveaways = new cache(databaseModel);
 };

@@ -3,20 +3,7 @@ const moment = require("moment");
 
 const { maintainers } = require("../../Configuration/config.js");
 
-module.exports = async(client, msg, suffix) => {
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
-	if (!serverDoc) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "An unexpected database error has occured.",
-				footer: {
-					text: "Please contact SunburntRock89#6617 for support.",
-				},
-			},
-		});
-	}
+module.exports = async(client, msg, suffix, serverDoc) => {
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
@@ -47,9 +34,6 @@ module.exports = async(client, msg, suffix) => {
 					name: "Leave",
 					value: "Allows a user to leave the giveaway.",
 				}],
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -65,9 +49,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You do not have permission to execute this command.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -76,9 +57,6 @@ module.exports = async(client, msg, suffix) => {
 					color: 0x7452A2,
 					title: "Voltus",
 					description: "Please enter a title for this giveaway.",
-					footer: {
-						text: `Type exit to exit`,
-					},
 				},
 			});
 			let collector = await msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
@@ -114,9 +92,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0x7452A2,
 						title: "Voltus",
 						description: "Thanks, now enter what I should send to the winner when the giveaway is ended or type nothing if you don't want me to send them anything.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 				let collector2 = await msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000, number: 1 });
@@ -162,9 +137,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: "Voltus",
 						description: "No giveaway ID specified.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -175,9 +147,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Giveaway could not be found.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -195,9 +164,6 @@ module.exports = async(client, msg, suffix) => {
 						name: "Owner",
 						value: msg.guild.members.get(giveawayDoc.dataValues.owner).toString() || `invalid-user#0001`,
 					}],
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 			break;
@@ -210,9 +176,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: "Voltus",
 						description: "No giveaway ID specified.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -224,9 +187,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Giveaway could not be found.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -237,41 +197,28 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You cannot join a giveaway that you own.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
 
-			let participantDoc = await GiveawayParticipants.findOne({ where: { userID: msg.author.id, guildID: msg.guild.id } });
+			let participantDoc = giveawayDoc.dataValues.enrolled.find(doc => doc == msg.author.id);
 			if (participantDoc) {
 				return msg.channel.send({
 					embed: {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You have already entered this giveaway.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
 
-			await GiveawayParticipants.create({
-				giveawayID,
-				userID: msg.author.id,
-				guildID: msg.guild.id,
-			});
+			giveawayDoc.dataValues.enrolled.push(msg.author.id);
 
 			msg.channel.send({
 				embed: {
 					color: 0x00FF00,
 					title: ":white_check_mark: Success!",
 					description: `You have successfully joined giveaway ID: ${giveawayID}`,
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 			break;
@@ -284,9 +231,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: "Voltus",
 						description: "No giveaway ID specified.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -297,9 +241,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You do not have permission to execute this command.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -310,9 +251,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Giveaway could not be found.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -323,9 +261,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Only the giveaway owner may end this giveaway.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -336,15 +271,12 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Giveaway has already been ended.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
 
-			let participants = await GiveawayParticipants.findAll({ where: { id: giveawayID, guildID: msg.guild.id } });
-			if (!participants[0]) {
+			let participants = giveawayDoc.dataValues.enrolled;
+			if (!participants) {
 				await giveawayDoc.set({ status: false });
 				await giveawayDoc.save();
 				await giveawayDoc.destroy({ where: { id: giveawayID, serverID: msg.guild.id } });
@@ -354,9 +286,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0x00FF00,
 						title: ":tada: Giveaway over!",
 						description: "No winner was picked as nobody entered :frowning:.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -378,9 +307,6 @@ module.exports = async(client, msg, suffix) => {
 						name: "Winner",
 						value: `${msg.guild.members.get(winner.dataValues.userID).toString() || "invalid-user#0001"}`,
 					}],
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 			if (giveawayDoc.dataValues.winMsg) {
@@ -412,7 +338,6 @@ module.exports = async(client, msg, suffix) => {
 			await giveawayDoc.save();
 			setTimeout(async() => {
 				await Giveaways.destroy({ where: { id: giveawayID } });
-				await GiveawayParticipants.destroy({ where: { giveawayID: giveawayID, guildID: msg.guild.id } });
 			}, 300000);
 			break;
 		}
@@ -424,9 +349,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: "Voltus",
 						description: "No giveaway ID specified.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -437,9 +359,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You do not have permission to execute this command.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -450,9 +369,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Giveaway could not be found.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -463,9 +379,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Only the giveaway owner may reroll this giveaway.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -476,13 +389,10 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "This giveaway cannot be rerolled.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
-			let participants = await GiveawayParticipants.findAll({ where: { id: giveawayID, serverID: msg.guild.id } });
+			let participants = giveawayDoc.dataValues.enrolled;
 			let winner = participants[Math.floor(Math.random() * participants.length)];
 			msg.channel.send({
 				embed: {
@@ -500,9 +410,6 @@ module.exports = async(client, msg, suffix) => {
 						name: "Winner",
 						value: `${msg.guild.members.get(winner.dataValues.userID).toString() || "invalid-user#0001"}`,
 					}],
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 			await giveawayDoc.set({ status: false, allowReroll: true, winner: winner.dataValues.userID });
@@ -517,9 +424,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: "Voltus",
 						description: "No giveaway ID specified.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -530,36 +434,27 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Giveaway could not be found.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
 
-			let particpantDoc = await GiveawayParticipants.findOne({ where: { userID: msg.author.id, giveawayID, guildID: msg.guild.id } });
+			let particpantDoc = giveawayDoc.dataValues.enrolled.find(doc => doc === msg.author.id);
 			if (!particpantDoc) {
 				return msg.channel.send({
 					embed: {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You are not a participant of this giveaway.",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
 
-			await GiveawayParticipants.destroy({ where: { userID: msg.author.id, giveawayID, guildID: msg.guild.id } });
+			giveawayDoc.dataValues.enrolled.splice(giveawayDoc.dataValues.enrolled.indexOf(msg.author.id), 1);
 			msg.channel.send({
 				embed: {
 					color: 0x00FF00,
 					title: "Voltus",
 					description: `You have left giveaway ID: ${giveawayID}`,
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 			break;
@@ -594,9 +489,6 @@ module.exports = async(client, msg, suffix) => {
 						name: "Leave",
 						value: "Allows a user to leave the giveaway.",
 					}],
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 		}
@@ -609,3 +501,4 @@ module.exports.info = {
 	level: 1,
 	aliases: [],
 };
+/* Todo, undo giveaway participants */

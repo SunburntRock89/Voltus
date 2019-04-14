@@ -1,22 +1,5 @@
-const { maintainers } = require("../../Configuration/config.js");
-
-module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if ((!doc || doc.dataValues.level !== 4) && !maintainers.includes(msg.author.id) && !msg.member.hasPermission(["ADMINISTRATOR", "MANAGE_GUILD"])) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
-	if (serverDoc.dataValues.massDMConfig) {
+module.exports = async(client, msg, suffix, doc) => {
+	if (doc.dataValues.massDMConfig) {
 		let all = Admins.findAll({ where: { serverID: msg.guild.id, level: 4 } });
 		for (let i of all) {
 			try {
@@ -26,9 +9,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":exclamation: Warning!",
 						description: `**${msg.author.tag}** has ran config in **${msg.guild.name}**`,
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			} catch (_) {
@@ -36,392 +16,280 @@ module.exports = async(client, msg, suffix) => {
 			}
 		}
 	}
-	await msg.delete();
 
-	let mainEmbed = await msg.channel.send({
-		embed: {
-			color: 0xFF0000,
-			description: `Starting...`,
-		},
-	});
-
-	const options = {};
-	options.moderation = {};
-
-	const mainmenu = async() => {
-		await mainEmbed.edit({
+	const stringConfig = async(item, full, menu) => {
+		await mainmsg.edit({
 			embed: {
 				color: 0x7452A2,
-				title: "Enter a number",
-				description: [`\`\`\`ini`,
-					`[1] Prefix ${options.prefix ? `[ ${options.prefix} ]` : ``}`,
-					`[2] Moderation ${Object.keys(options.moderation).length !== 0 ? `[ EDITED ]` : ``}`,
-					`[3] Admins`,
-					`\`\`\``,
-					`Type **s** to save || Type **e** to exit`,
-				].join("\n"),
+				title: `${item.emoji} ${item.name}`,
+				description: `${item.explanation}\n**Would you like to change it?**`,
 			},
 		});
-		let collector = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-		collector.on("collect", async cmsg => {
-			await cmsg.delete();
-			switch (cmsg.content) {
-				case "1": {
-					await submenu1();
-					await collector.stop();
-					collector = null;
+
+		mainmsg.react("✅").then(() => {
+			mainmsg.react("❌");
+		});
+
+		let collector = mainmsg.createReactionCollector((r, u) => u.id == msg.author.id && ["✅", "❌"].includes(r.emoji.name), { time: 30000 });
+		collector.on("collect", async(reaction, user) => {
+			switch (reaction.emoji.name) {
+				case "❌": {
+					mainmsg.reactions.removeAll();
+					generateMenu(mainMenu);
 					break;
 				}
-				case "2": {
-					await submenu2();
-					await collector.stop();
-					collector = null;
-					break;
-				}
-				case "3": {
-					await submenu3();
-					await collector.stop();
-					collector = null;
-					break;
-				}
-				case "s": {
-					await collector.stop();
-					await mainEmbed.edit({
+				case "✅": {
+					mainmsg.reactions.removeAll();
+					await mainmsg.edit({
 						embed: {
-							color: 0xFFFF00,
-							description: "Saving...",
+							color: 0x7452A2,
+							title: `${item.emoji} ${item.name}`,
+							description: `Enter a new value for your ${item.name}`,
 						},
 					});
-					await serverDoc.save().then(async() => {
-						await mainEmbed.edit({
-							embed: {
-								color: 0x00FF00,
-								description: "Saved!",
-							},
-						});
-						setTimeout(async() => {
-							await mainEmbed.delete();
-						}, 5000);
-					});
-					setTimeout(async() => {
-						await mainEmbed.delete();
-					}, 5000);
-					break;
-				}
-				case "e": {
-					await collector.stop();
-					collector = null;
-					await mainEmbed.edit({
-						embed: {
-							color: 0xFF0000,
-							description: "Exiting config...",
-						},
-					});
-					setTimeout(async() => {
-						await mainEmbed.delete();
-					}, 5000);
-					break;
-				}
-				default: {
-					await mainEmbed.edit({
-						embed: {
-							color: 0xFF0000,
-							title: "Invalid option. Enter a number",
-							description: [`\`\`\`ini`,
-								`[1] Prefix ${options.prefix ? `[ ${options.prefix} ]` : ``}`,
-								`[2] Moderation ${Object.keys(options.moderation).length !== 0 ? `[ EDITED ]` : ``}`,
-								`\`\`\``,
-								`Type **s** to save || Type **e** to exit`,
-							].join("\n"),
-						},
+					let msgcollector = mainmsg.channel.createMessageCollector(m => m.author.id == msg.author.id, { time: 30000 });
+					msgcollector.on("collect", cmsg => {
+						msgcollector.stop();
+						doc.set({ [item.dbEntry]: cmsg.content });
+						menu.find(m => m.name == item.name).value = cmsg.content;
+						return generateMenu(mainMenu);
 					});
 				}
 			}
 		});
 	};
 
-	await mainmenu();
+	const onOrOff = async(item, full, menu) => {
+		await mainmsg.edit({
+			embed: {
+				color: 0x7452A2,
+				title: `${item.emoji} ${item.name}`,
+				description: `${item.explanation}\n**Would you like to enable it?**`,
+			},
+		});
 
-	const submenu1 = async() => {
-		await mainEmbed.edit({
-			embed: {
-				color: 0x0000FF,
-				description: "Enter a new prefix. It must not be longer than 10 characters.",
-			},
+		mainmsg.react("✅").then(() => {
+			mainmsg.react("❌");
 		});
-		let subcollector1 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-		subcollector1.on("collect", async cmsg => {
-			await cmsg.delete();
-			if (cmsg.content.length > 10) {
-				return mainEmbed.edit({
-					embed: {
-						color: 0xFF0000,
-						description: "Prefix too long. Enter a prefix shorter than 10 characters.",
-					},
-				});
-			}
-			await subcollector1.stop();
-			subcollector1 = null;
-			serverDoc.set({ prefix: cmsg.content });
-			options.prefix = cmsg.content;
-			await mainmenu();
-		});
-	};
-	const submenu2 = async() => {
-		await mainEmbed.edit({
-			embed: {
-				color: 0x7452A2,
-				title: "Enter a number",
-				description: [
-					`\`\`\`ini`,
-					`[1] Enabled ${options.moderation.enabled ? `[ ${options.moderation.enabled} ]` : ``}`,
-					`[2] Kick Confirmation ${options.moderation.kickConfirms ? `[ ${options.moderation.kickConfirms} ]` : ""}`,
-					`[3] Ban Confirmation ${options.moderation.banConfirms ? `[ ${options.moderation.banConfirms} ]` : ""}`,
-					`\`\`\``,
-					`Type **b** to go back || Type **e** to exit`,
-				].join("\n"),
-			},
-		});
-		let subcollector2 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-		subcollector2.on("collect", async cmsg => {
-			await cmsg.delete();
-			switch (cmsg.content) {
-				case "1": {
-					await subcollector2.stop();
-					subcollector2 = null;
-					await mainEmbed.edit({
-						embed: {
-							color: 0x7452A2,
-							title: "Moderation Pack",
-							description: "The moderation pack allows you to moderate your chat quickly and effectively. Would you like to enable it?",
-							footer: {
-								text: "Reply with yes or no. Invalid options will be counted as no.",
-							},
-						},
-					});
-					let collector21 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-					collector21.on("collect", async c2msg => {
-						await collector21.stop();
-						await c2msg.delete();
-						if (c2msg.content.toLowerCase() !== ("yes" || "no")) c2msg.content = "no";
-						switch (c2msg.content.toLowerCase()) {
-							case "yes": {
-								serverDoc.set({ moderationEnabled: true });
-								options.moderation.enabled = "Yes";
-								await submenu2();
-								break;
-							}
-							case "no": {
-								serverDoc.set({ moderationEnabled: false });
-								options.moderation.enabled = "No";
-								await submenu2();
-								break;
-							}
-						}
-					});
+
+		let collector = mainmsg.createReactionCollector((r, u) => u.id == msg.author.id && ["✅", "❌"].includes(r.emoji.name), { time: 30000 });
+		collector.on("collect", async(reaction, user) => {
+			switch (reaction.emoji.name) {
+				case "❌": {
+					mainmsg.reactions.removeAll();
+					doc.set({ [item.dbEntry]: false })
+					menu.find(m => m.name == item.name).newval = false;
+					generateMenu(mainMenu);
 					break;
 				}
-				case "2": {
-					await subcollector2.stop();
-					subcollector2 = null;
-					await mainEmbed.edit({
-						embed: {
-							color: 0x7452A2,
-							title: "Kick Confirmation",
-							description: "Kick Confirmation toggles the \"Are you sure you would like to kick\" dialogue. Would you like it enabled?",
-							footer: {
-								text: "Reply with yes or no. Invalid options will be counted as no.",
-							},
-						},
-					});
-					let collector22 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-					collector22.on("collect", async c2msg => {
-						await collector22.stop();
-						await c2msg.delete();
-						if (c2msg.content.toLowerCase() !== ("yes" || "no")) c2msg.content = "no";
-						switch (c2msg.content.toLowerCase()) {
-							case "yes": {
-								serverDoc.set({ kickConfirms: true });
-								options.moderation.kickConfirms = "Yes";
-								await submenu2();
-								break;
-							}
-							case "no": {
-								serverDoc.set({ kickConfirms: false });
-								options.moderation.kickConfirms = "No";
-								await submenu2();
-								break;
-							}
-						}
-					});
+				case "✅": {
+					mainmsg.reactions.removeAll();
+					doc.set({ [item.dbEntry]: true })
+					menu.find(m => m.name == item.name).newval = true;
+					generateMenu(mainMenu);
 					break;
-				}
-				case "3": {
-					await subcollector2.stop();
-					subcollector2 = null;
-					mainEmbed.edit({
-						embed: {
-							color: 0x7452A2,
-							title: "Ban Confirmation",
-							description: "Ban Confirmation toggles the \"Are you sure you would like to ban\" dialogue. Would you like it enabled?",
-							footer: {
-								text: "Reply with yes or no. Invalid options will be counted as no.",
-							},
-						},
-					});
-					let collector23 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id, { time: 30000 });
-					collector23.on("collect", async c2msg => {
-						collector23.stop();
-						await c2msg.delete();
-						if (c2msg.content.toLowerCase() !== ("yes" || "no")) c2msg.content = "no";
-						switch (c2msg.content.toLowerCase()) {
-							case "yes": {
-								serverDoc.set({ banConfirms: true });
-								options.moderation.banConfirms = "Yes";
-								await submenu2();
-								break;
-							}
-							case "no": {
-								serverDoc.set({ banConfirms: false });
-								options.moderation.banConfirms = "No";
-								await submenu2();
-								break;
-							}
-						}
-					});
-					break;
-				}
-				case "b": {
-					await subcollector2.stop();
-					subcollector2 = null;
-					await mainmenu();
-					break;
-				}
-				case "e": {
-					await mainEmbed.edit({
-						embed: {
-							color: 0xFF0000,
-							description: "Exiting config...",
-						},
-					});
-					setTimeout(async() => {
-						await mainEmbed.delete();
-					}, 5000);
-					break;
-				}
-				default: {
-					await mainEmbed.edit({
-						embed: {
-							color: 0xFF0000,
-							title: "Invalid Option. Enter a number",
-							description: [
-								`\`\`\`ini`,
-								`[1] Kick Confirmation ${options.moderation.kickConfirms ? `[ ${options.moderation.kickConfirms} ]` : ""}`,
-								`[2] Ban Confirmation ${options.moderation.banConfirms ? `[ ${options.moderation.banConfirms} ]` : ""}`,
-								`\`\`\``,
-								`Type **b** to go back || Type **e** to exit`,
-							].join("\n"),
-						},
-					});
 				}
 			}
 		});
 	};
-	const submenu3 = async() => {
-		await mainEmbed.edit({
+
+	const discordID = async(item, full, menu, type) => {
+		
+	}
+
+	let mainmsg;
+
+	const generateMenu = async items => {
+		let fields = [];
+
+		for (let i of items) {
+			fields.push({
+				name: `${i.emoji} ${i.name}`,
+				value: `${i.description} ${i.value ? [true, false].includes(i.value) ? i.value == true ? "(on)" : "(off)" : `(${i.value})` : ""}`,
+				inline: false,
+			});
+		}
+
+		let embed = {
 			embed: {
 				color: 0x7452A2,
-				title: "Enter a number",
-				description: [
-					`\`\`\`ini`,
-					`[1] Add User`,
-					`[2] Add Role`,
-					`[3] Change User Level`,
-					`[4] Change Role Level`,
-					`[5] Remove User`,
-					`[6] Remove Role`,
-					`\`\`\``,
-					`Type **b** to go back || Type **e** to exit`,
-				].join("\n"),
+				title: "Voltus",
+				description: "Select an emoji",
+				fields,
 			},
-		});
-		let subcollector3 = msg.channel.createMessageCollector(newmsg => newmsg.author.id === msg.author.id, { time: 30000 });
-		subcollector3.on("collect", async cmsg => {
-			switch (cmsg.content) {
-				case "1": {
-					await subcollector3.stop();
-					await mainEmbed.edit({
-						embed: {
-							color: 0x7452A2,
-							title: "Add an Admin User",
-							description: "Please specify a user to add.",
-						},
-					});
-					let subcollector31 = msg.channel.createMessageCollector(newmsg => newmsg.author.id, { time: 30000 });
-					subcollector31.on("collect", async c2msg => {
-						let member = await client.memberSearch(c2msg.content, msg.guild).catch(async() => {
-							await mainEmbed.edit({
-								embed: {
-									color: 0xFF0000,
-									title: "Add an Admin User",
-									description: "Could not find a user. Please specify a user to add.",
-								},
-							});
-						});
-						if (member) {
-							await subcollector31.stop();
-							await mainEmbed.edit({
-								embed: {
-									color: 0x7452A2,
-									title: "Add an Admin User",
-									description: "Please specify this user's level.",
-								},
-							});
-							let subcollector311 = msg.channel.createMessageCollector(newmsg => msg.author.id === newmsg.author.id);
-							subcollector311.on("collect", async c3msg => {
-								let level = parseInt(c3msg.content);
-								if (level >= 5 || !isNaN) {
-									await mainEmbed.edit({
-										embed: {
-											color: 0xFF0000,
-											title: "Add an Admin User",
-											description: "Please specify this user's level. It must be a **number** that is **lower** than 5.",
-										},
-									});
-								}
-								// TODO: Finish this
-							});
-						}
-					});
-					break;
-				}
-				default: {
-					await mainEmbed.edit({
-						embed: {
-							color: 0xFF0000,
-							title: "Invalid option",
-							description: [
-								`\`\`\`ini`,
-								`[1] Add User`,
-								`[2] Add Role`,
-								`[3] Change User Level`,
-								`[4] Change Role Level`,
-								`[5] Remove User`,
-								`[6] Remove Role`,
-								`\`\`\``,
-								`Type **b** to go back || Type **e** to exit`,
-							].join("\n"),
-						},
-					});
-				}
+		};
+
+		if (!mainmsg) {
+			mainmsg = await msg.channel.send(embed);
+		} else {
+			await mainmsg.edit(embed);
+		}
+
+		(() => {
+			for (let i of items) {
+				mainmsg.react(i.emoji);
 			}
+		})();
+
+		let collector = mainmsg.createReactionCollector((r, u) => u.id == msg.author.id && items.find(i => i.emoji == r.emoji.name), { time: 30000 });
+		collector.on("collect", async(reaction, user) => {
+			collector.stop();
+			let item = items.find(i => i.emoji == reaction.emoji.name);
+			mainmsg.reactions.removeAll();
+			item.function(item, true, items);
 		});
 	};
+
+	let mainMenu = [{
+		name: "Prefix",
+		emoji: "❗",
+		description: "Change the prefix used to invoke commands in Voltus.",
+		explanation: "The prefix in a server is used to invoke any command in the bot.",
+		dbEntry: "prefix",
+		function: stringConfig,
+	}, {
+		name: "Save Changes",
+		emoji: "💾",
+		description: "Save the changes you have made to your configuration.",
+		function: doc.save,
+	}];
+
+	let moderationMenu = [{
+		name: "Mute role",
+		emoji: "🔇",
+		description: "",
+		explanation: "",
+		dbEntry: "muteRole",
+		function: ,
+	}, {
+		name: "Agree channel",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "agreeChannel",
+		function: ,
+	}, {
+		name: "Agree role",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "agreeRole",
+		function: ,
+	}, {
+		name: "Kick confirms",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "kickConfirms",
+		function: onOrOff,
+	}, {
+		name: "Ban confirms",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "banConfirms",
+		function: onOrOff,
+	}, {
+		name: "Nuke limit",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "nukeLimit",
+		function: onOrOff,
+	}, {
+		name: "IP filter",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "ipFilter",
+		function: onOrOff,
+	}, {
+		name: "Raid mode",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "raidMode",
+		function: onOrOff,
+	}, {
+		name: "Go back",
+		emoji: "◀️",
+		description: "Goes back to the previous menu",
+		function: () => {
+			generateMenu(mainMenu);
+		}
+	}];
+
+	let utilityMenu = [{
+		name: "Starboard enabled",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "starboardEnabled",
+		function: onOrOff,
+	}, {
+		name: "Starboard channel",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "starboardChannel",
+		function: ,
+	}, {
+		name: "Leave Messages Enabled",
+		emoji:"",
+		description: "",
+		explanation: "",
+		dbEntry: "leaveEnabled",
+		function: onOrOff,
+	}, {
+		name: "Leave channel",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "leaveChannel",
+		function: ,
+	}, {
+		name: "Leave Message",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "leaveChannel",
+		function: stringConfig,
+	}, {
+		name: "Join messages",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "newMemberEnabled",
+		function: ,
+	}, {
+		name: "Join channel",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "newMemberChannel",
+		function: ,
+	}, {
+		name: "Join message",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "newMemberMessage",
+		function: stringConfig,
+	}, {
+		name: "Go back",
+		emoji: "◀️",
+		description: "Goes back to the previous menu",
+		function: () => {
+			generateMenu(mainMenu);
+		}
+	}];
+
+	generateMenu(mainMenu);
 };
 module.exports.info = {
 	name: "Config",
 	description: "Allows you to change your server settings.",
 	pack: "Essential",
 	level: 4,
-	aliases: [],
+	aliases: ["setup"],
 };

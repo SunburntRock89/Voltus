@@ -1,29 +1,12 @@
 const { maintainers } = require("../../Configuration/config.js");
 
-module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if (!doc && !maintainers.includes(msg.author.id)) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
+module.exports = async(client, msg, suffix, serverDoc) => {
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -34,23 +17,16 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Message count must be a number.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
 
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
 	if (serverDoc.dataValues.nukeLimit < parseInt(suffix)) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Message count larger than nuke limit.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -64,9 +40,6 @@ module.exports = async(client, msg, suffix) => {
 					color: 0xFF0000,
 					title: ":x: Error!",
 					description: "Messages could not be deleted.",
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 		}
@@ -75,9 +48,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0x00FF00,
 				title: ":white_check_mark: Success!",
 				description: `Successfully nuked ${suffix} messages.`,
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	};
@@ -114,9 +84,6 @@ module.exports = async(client, msg, suffix) => {
 									color: 0xFF0000,
 									title: ":exclamation: Warning!",
 									description: `**${msg.author.name}** has just nuked **${suffix}** messages in **${msg.channel.name}** of **${msg.guild.name}**`,
-									footer: {
-										text: require("../../package.json").version,
-									},
 								},
 							});
 						} catch (_) {

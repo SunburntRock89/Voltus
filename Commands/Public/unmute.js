@@ -1,21 +1,6 @@
 const { maintainers } = require("../../Configuration/config.js");
 
-module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if (!doc && !maintainers.includes(msg.author.id)) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
+module.exports = async(client, msg, suffix, serverDoc) => {
 	if (!serverDoc.dataValues.muteEnabled) msg.channel.send("Mute is not enabled in this server.");
 	if (!serverDoc.dataValues.muteRole) msg.channel.send("Mute is not properly configured in this server.");
 
@@ -25,9 +10,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -41,9 +23,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Could not resolve a member.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -60,15 +39,23 @@ module.exports = async(client, msg, suffix) => {
 	try {
 		member.roles.remove(muteRole);
 		if (newMemberRole) member.roles.add(newMemberRole);
+		modLogger.log({
+			type: "Unmute",
+			moderator: {
+				id: msg.author.id,
+				tag: msg.user.tag,
+			},
+			user: {
+				id: member.id,
+				tag: member.tag,
+			},
+		});
 	} catch (err) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "I am unable to add roles to that member.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}

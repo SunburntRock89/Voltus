@@ -9,9 +9,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "You need to give me something to do!",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -32,9 +29,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "You need to give me something to search for!",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -47,9 +41,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Your search returned no results!",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				}));
 
@@ -59,9 +50,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: "Your search returned no results!",
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			}
@@ -112,9 +100,6 @@ module.exports = async(client, msg, suffix) => {
 					color: 0xFF0000,
 					title: ":x: Error!",
 					description: "This option is invalid",
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 		}

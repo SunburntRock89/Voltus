@@ -1,29 +1,12 @@
 const { maintainers } = require("../../Configuration/config.js");
 
-module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if ((!doc || doc.dataValues.level !== 3) && !maintainers.includes(msg.author.id) && !msg.member.hasPermission(["ADMINISTRATOR", "MANAGE_GUILD"])) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
+module.exports = async(client, msg, suffix, doc) => {
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -47,9 +30,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Could not resolve a member.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -60,23 +40,17 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "This user cannot be banned.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
 
-	let memberDoc = await Admins.findOne({ where: { serverID: msg.guild.id, id: member.id } });
+	let memberDoc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: member.id } });
 	if (memberDoc && memberDoc.dataValues.level >= doc.dataValues.level) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "You cannot strike a member with the same or higher admin level than you.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -98,15 +72,24 @@ module.exports = async(client, msg, suffix) => {
 		}
 		try {
 			await member.ban({ days: 7, reason });
+			modLogger.log({
+				type: "Ban",
+				moderator: {
+					id: msg.author.id,
+					tag: msg.user.tag,
+				},
+				user: {
+					id: member.id,
+					tag: member.tag,
+				},
+				reason,
+			});
 		} catch (err) {
 			return msg.channel.send({
 				embed: {
 					color: 0xFF0000,
 					title: ":x: Error!",
 					description: "This user cannot be banned.",
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 		}
@@ -122,7 +105,7 @@ module.exports = async(client, msg, suffix) => {
 		});
 	};
 
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
+	let serverDoc = doc;
 	if (serverDoc.dataValues.banConfirms) {
 		msg.channel.send({
 			embed: {
@@ -148,9 +131,6 @@ module.exports = async(client, msg, suffix) => {
 							color: 0x7452A2,
 							title: "Voltus",
 							description: "Ban cancelled.",
-							footer: {
-								text: require("../../package.json").version,
-							},
 						},
 					});
 					await collector.stop();

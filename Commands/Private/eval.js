@@ -1,4 +1,4 @@
-const { maintainers, version } = require("../../Configuration/config.js");
+const { maintainers } = require("../../Configuration/config.js");
 
 const { post } = require("snekfetch");
 
@@ -48,16 +48,13 @@ module.exports = async(client, msg, suffix) => {
 		} else {
 			let res;
 			try {
-				res = await post("https://hastebin.com/documents").send(`// Eval error results: ${time} ${today}\n\n${result}`);
+				res = await post("https://hasteb.in/documents").send(`// Eval error results: ${time} ${today}\n\n${result}`);
 			} catch (err2) {
 				return msg.channel.send({
 					embed: {
 						color: 0xFF0000,
 						title: ":x: Error!",
 						description: `An unexpected error occurred while uploading to Hastebin.\`\`\`js\n${err.stack}\`\`\``,
-						footer: {
-							text: version,
-						},
 					},
 				});
 			}
@@ -89,9 +86,6 @@ module.exports = async(client, msg, suffix) => {
 					color: 0xFF0000,
 					title: ":x: Error!",
 					description: `An unexpected error occurred while uploading to Hastebin.\`\`\`js\n${err.stack}\`\`\``,
-					footer: {
-						text: version,
-					},
 				},
 			});
 		}

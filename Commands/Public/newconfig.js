@@ -1,5 +1,4 @@
-module.exports = async(client, msg, suffix) => {
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
+module.exports = async(client, msg, suffix, serverDoc) => {
 	if (serverDoc.dataValues.massDMConfig) {
 		let all = Admins.findAll({ where: { serverID: msg.guild.id, level: 4 } });
 		for (let i of all) {
@@ -10,9 +9,6 @@ module.exports = async(client, msg, suffix) => {
 						color: 0xFF0000,
 						title: ":exclamation: Warning!",
 						description: `**${msg.author.tag}** has ran config in **${msg.guild.name}**`,
-						footer: {
-							text: require("../../package.json").version,
-						},
 					},
 				});
 			} catch (_) {
@@ -199,7 +195,8 @@ module.exports.info = {
 	level: 4,
 	aliases: [],
 };
-/**params: {
+/**
+params: {
 	name: "",
 	description: "",
 	keyToChange: "eg moderation enabled"

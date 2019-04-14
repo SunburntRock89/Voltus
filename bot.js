@@ -5,6 +5,7 @@ const { createLogger, format, transports } = require("winston");
 const reload = global.reload = require("require-reload")(require);
 const Sequelize = global.Sequelize = require("sequelize");
 const DailyRotateFile = require("winston-daily-rotate-file");
+const modLogger = global.modLogger = require("./Internals/modLog.js");
 
 const auth = require("./Configuration/auth.js");
 const config = global.config = require("./Configuration/config.js");
@@ -38,8 +39,6 @@ const cmds = global.cmds = [];
 (async() => {
 	await require("./Database/init.js")();
 
-	let structures = await readdir("./Structures");
-	for (let s of structures) if (s.endsWith(".js")) require(`./Structures/${s}`)();
 	// Event Handler
 	let events = await readdir("./Events");
 	for (let e of events) {
@@ -79,6 +78,8 @@ const login = () => client.login(require("./Configuration/auth.js").discord.toke
 			});
 	}, 300000);
 });
+
+process.on("unhandledRejection", e => winston.error(e.stack));
 
 client.memberSearch = async(string, guild) => new Promise((resolve, reject) => {
 	let foundMember;

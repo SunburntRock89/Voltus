@@ -1,29 +1,12 @@
 const { maintainers } = require("../../Configuration/config.js");
 
-module.exports = async(client, msg, suffix) => {
-	let doc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: msg.author.id } });
-	if ((!doc || doc.dataValues.level !== 2) && !maintainers.includes(msg.author.id) && !msg.member.hasPermission(["ADMINISTRATOR", "MANAGE_GUILD"])) {
-		return msg.channel.send({
-			embed: {
-				color: 0xFF0000,
-				title: ":x: Error!",
-				description: "You do not have permission to execute this command.",
-				footer: {
-					text: require("../../package.json").version,
-				},
-			},
-		});
-	}
-
+module.exports = async(client, msg, suffix, serverDoc) => {
 	if (!suffix) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "No arguments were specified.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -47,9 +30,6 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "Could not resolve a member.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
@@ -60,23 +40,18 @@ module.exports = async(client, msg, suffix) => {
 				color: 0xFF0000,
 				title: ":x: Error!",
 				description: "This user cannot be kicked.",
-				footer: {
-					text: require("../../package.json").version,
-				},
 			},
 		});
 	}
 
-	let memberDoc = await Admins.findOne({ where: { serverID: msg.guild.id, id: member.id } });
-	if (memberDoc && memberDoc.dataValues.level >= doc.dataValues.level) {
+
+	let memberDoc = await Admins.findOne({ where: { serverID: msg.guild.id, userID: member.id } });
+	if (memberDoc && memberDoc.dataValues.level >= msg.author.adminLevel.level) {
 		return msg.channel.send({
 			embed: {
 				color: 0xFF0000,
 				title: ":x: Error!",
-				description: "You cannot strike a member with the same or higher admin level than you.",
-				footer: {
-					text: require("../../package.json").version,
-				},
+				description: "You are not allowed to kick this user!",
 			},
 		});
 	}
@@ -104,12 +79,21 @@ module.exports = async(client, msg, suffix) => {
 					color: 0xFF0000,
 					title: ":x: Error!",
 					description: "This user cannot be kicked.",
-					footer: {
-						text: require("../../package.json").version,
-					},
 				},
 			});
 		}
+		modLogger.log({
+			type: "Kick",
+			moderator: {
+				id: msg.author.id,
+				tag: msg.user.tag,
+			},
+			user: {
+				id: member.id,
+				tag: member.tag,
+			},
+			reason,
+		});
 		msg.channel.send({
 			embed: {
 				color: 0x00FF00,
@@ -122,7 +106,6 @@ module.exports = async(client, msg, suffix) => {
 		});
 	};
 
-	let serverDoc = await ServerConfigs.findOne({ where: { id: msg.guild.id } });
 	if (serverDoc.dataValues.kickConfirms) {
 		msg.channel.send({
 			embed: {
@@ -148,9 +131,6 @@ module.exports = async(client, msg, suffix) => {
 							color: 0x7452A2,
 							title: "Voltus",
 							description: "Ban cancelled.",
-							footer: {
-								text: require("../../package.json").version,
-							},
 						},
 					});
 					await collector.stop();

@@ -7,15 +7,12 @@ module.exports = async member => {
 		try {
 			await member.guild.channels.get(doc.dataValues.newMemberChannel).send({
 				embed: {
-					color: 0x00FF00,
+					color: 0x7452A2,
 					title: ":wave: Welcome!",
 					description: doc.dataValues.newMemberMessage.replace("@mention", member.toString())
 						.replace("@member", member.user.tag)
 						.replace("@id", member.id)
 						.replace("@guild", member.guild.name),
-					footer: {
-						text: require("../package.json").version,
-					},
 				},
 			});
 		} catch (_) {

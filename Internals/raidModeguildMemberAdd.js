@@ -7,9 +7,6 @@ module.exports = async(client, member, doc) => {
 					color: 0xFF0000,
 					title: ":exclamation: Raid Mode",
 					description: `**${member.user.tag}** has just joined **${member.guild.name}**.`,
-					footer: {
-						text: require("../package.json").version,
-					},
 				},
 			});
 		} catch (_) {

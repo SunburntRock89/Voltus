@@ -1,5 +1,5 @@
 module.exports = async sequelize => {
-	const Admins = global.Admins = sequelize.define("Admins", {
+	const databaseModel = sequelize.define("Admins", {
 		userID: {
 			type: Sequelize.STRING,
 			allowNull: true,
@@ -25,5 +25,7 @@ module.exports = async sequelize => {
 		},
 	});
 
-	await Admins.sync();
+	await databaseModel.sync();
+
+	const Admins = global.Admins = new cache(databaseModel);
 };

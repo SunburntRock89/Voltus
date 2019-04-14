@@ -1,5 +1,5 @@
 module.exports = async guild => {
-	let doc = await ServerConfigs.findOrCreate({ where: { id: guild.id }, defaults: { id: guild.id } });
+	let doc = await ServerConfigs.findCreateFind({ where: { id: guild.id }, defaults: { id: guild.id }, cache: false });
 	for (let m of guild.members.values()) {
 		if (m.hasPermission("ADMINSITRATOR") && !m.user.bot) {
 			await Admins.create({

@@ -2,6 +2,8 @@ const { readdir } = require("fs-nextra");
 
 const auth = require("../Configuration/auth.js");
 
+const cache = global.cache = require("./Caching/model");
+
 const sequelize = new Sequelize({
 	host: auth.db.host,
 	database: auth.db.name,
