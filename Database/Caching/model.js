@@ -87,8 +87,9 @@ module.exports = class Model {
 	}
 
 	async findCreateFind(options) {
+		console.log(options)
 		if (!options) throw new Error("Nothing to work with.");
-		if (!options.where || !options.defafults) throw new Error("No where or default.");
+		if (!options.where || !options.defaults) throw new Error("No where or default.");
 
 		let thing = await this.get(options);
 		if (thing) return new resultFound({ values: thing, cache: this.cache });

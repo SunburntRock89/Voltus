@@ -1,13 +1,22 @@
 const { getAdminLevel, getServerDoc } = require("../Internals/util.js");
 
+const public = alias => {
+	try {
+		cmdFile = reload(`./Commands/Public/${alias.name}`);
+	} catch (err) {
+		return null;
+	}
+};
+
 module.exports = async msg => {
 	let doc;
+	if (msg.author.bot) return;
 
 	let prefix = "";
 	if (msg.guild) {
 		doc = await getServerDoc(msg.guild.id);
 		if (!doc) {
-			msg.channel.send({
+			return msg.channel.send({
 				embed: {
 					color: 0xFF0000,
 					title: ":x: Error!",
@@ -24,7 +33,7 @@ module.exports = async msg => {
 		if (msg.content.startsWith(doc.dataValues.prefix)) prefix = doc.dataValues.prefix;
 	}
 
-	if (msg.author.bot || !msg.content.startsWith(doc.dataValues.prefix || `${client.user} `)) return;
+	if (!msg.content.startsWith(doc.dataValues.prefix || `${client.user} `)) return;
 
 
 	let cmd = msg.content.split(" ")[0].trim().toLowerCase().replace(prefix, "");
@@ -32,14 +41,6 @@ module.exports = async msg => {
 		.trim();
 
 	let alias = cmds.find(a => a.aliases.includes(cmd));
-
-	const public = () => {
-		try {
-			cmdFile = reload(`./Commands/Public/${alias.name}`);
-		} catch (err) {
-			return null;
-		}
-	};
 
 	let cmdFile;
 	if (msg.channel.type === "dm") {
@@ -52,11 +53,13 @@ module.exports = async msg => {
 		try {
 			cmdFile = reload(`./Commands/Private/${cmd}.js`);
 		} catch (_) {
-			public();
+			public(alias);
 		}
 	} else {
-		public();
+		public(alias);
 	}
+
+	if (!cmdFile) return;
 
 	// if (msg.guild && alias.pack !== "Essential" && !doc.dataValues[`${alias.pack}Enabled`]) return msg.channel.send(`The ${alias.pack} pack is not enabled in this server.`);
 	if (cmdFile.info.level > 0) {
@@ -73,7 +76,6 @@ module.exports = async msg => {
 		}
 	}
 
-	if (cmdFile) {
 		cmdFile(client, msg, suffix, doc).catch(err => {
 			msg.channel.send({
 				embed: {
@@ -86,5 +88,4 @@ module.exports = async msg => {
 				},
 			});
 		});
-	}
 };
