@@ -77,14 +77,14 @@ module.exports = async(client, msg, suffix, doc) => {
 			switch (reaction.emoji.name) {
 				case "❌": {
 					mainmsg.reactions.removeAll();
-					doc.set({ [item.dbEntry]: false })
+					doc.set({ [item.dbEntry]: false });
 					menu.find(m => m.name == item.name).newval = false;
 					generateMenu(mainMenu);
 					break;
 				}
 				case "✅": {
 					mainmsg.reactions.removeAll();
-					doc.set({ [item.dbEntry]: true })
+					doc.set({ [item.dbEntry]: true });
 					menu.find(m => m.name == item.name).newval = true;
 					generateMenu(mainMenu);
 					break;
@@ -94,8 +94,80 @@ module.exports = async(client, msg, suffix, doc) => {
 	};
 
 	const discordID = async(item, full, menu, type) => {
-		
-	}
+		await mainmsg.edit({
+			embed: {
+				color: 0x7452A2,
+				title: `${item.emoji} ${item.name}`,
+				description: `${item.explanation}\n**Would you like to change it?**`,
+			},
+		});
+
+		mainmsg.react("✅").then(() => {
+			mainmsg.react("❌");
+		});
+
+		let collector = mainmsg.createReactionCollector((r, u) => u.id == msg.author.id && ["✅", "❌"].includes(r.emoji.name), { time: 30000 });
+		collector.on("collect", async(reaction, user) => {
+			switch (reaction.emoji.name) {
+				case "❌": {
+					mainmsg.reactions.removeAll();
+					generateMenu(mainMenu);
+					break;
+				}
+				case "✅": {
+					mainmsg.reactions.removeAll();
+					await mainmsg.edit({
+						embed: {
+							color: 0x7452A2,
+							title: `${item.emoji} ${item.name}`,
+							description: `Enter a new value for your ${item.name}`,
+						},
+					});
+					let msgcollector = mainmsg.channel.createMessageCollector(m => m.author.id == msg.author.id, { time: 30000 });
+					msgcollector.on("collect", async cmsg => {
+						await cmsg.delete();
+						let res;
+						switch (type) {
+							case "role": {
+								res = cmsg.mentions.roles.first();
+								if (!res) res = cmsg.guild.roles.find(r => r.name == cmsg.content);
+								if (!res) res = cmsg.guild.roles.get(cmsg.content);
+								if (!res) {
+									await mainmsg.edit({
+										embed: {
+											color: 0xFF0000,
+											title: ":x: Invalid Entry.",
+											description: `Enter a new value for your ${item.name}`,
+										},
+									});
+								}
+								break;
+							}
+							case "channel": {
+								res = cmsg.mentions.channlels.first();
+								if (!res) res = cmsg.guild.channels.find(r => r.name == cmsg.content);
+								if (!res) res = cmsg.guild.channels.get(cmsg.content);
+								if (!res) {
+									await mainmsg.edit({
+										embed: {
+											color: 0xFF0000,
+											title: ":x: Invalid Entry.",
+											description: `Enter a new value for your ${item.name}`,
+										},
+									});
+								}
+								break;
+							}
+						}
+						msgcollector.stop();
+						doc.set({ [item.dbEntry]: res.id });
+						menu.find(m => m.name == item.name).value = `<@${res.id}>`;
+						return generateMenu(mainMenu);
+					});
+				}
+			}
+		});
+	};
 
 	let mainmsg;
 
@@ -136,7 +208,7 @@ module.exports = async(client, msg, suffix, doc) => {
 			collector.stop();
 			let item = items.find(i => i.emoji == reaction.emoji.name);
 			mainmsg.reactions.removeAll();
-			item.function(item, true, items);
+			item.function(item, true, items, item.type);
 		});
 	};
 
@@ -148,6 +220,20 @@ module.exports = async(client, msg, suffix, doc) => {
 		dbEntry: "prefix",
 		function: stringConfig,
 	}, {
+		name: "Moderation Settings",
+		emoji: "🔨",
+		description: "Goes back to the previous menu",
+		function: () => {
+			generateMenu(moderationMenu);
+		},
+	}, {
+		name: "Utility Settings",
+		emoji: "🙋",
+		description: "Goes back to the previous menu",
+		function: () => {
+			generateMenu(utilityMenu);
+		},
+	}, {
 		name: "Save Changes",
 		emoji: "💾",
 		description: "Save the changes you have made to your configuration.",
@@ -155,57 +241,68 @@ module.exports = async(client, msg, suffix, doc) => {
 	}];
 
 	let moderationMenu = [{
-		name: "Mute role",
-		emoji: "🔇",
-		description: "",
-		explanation: "",
+		name: "Moderation Enabled",
+		emoji: "🔨",
+		description: "Enables the moderation pack.",
+		explanation: "The moderation pack allows server Administrators to perform moderative actions on rule breaking users.",
 		dbEntry: "muteRole",
-		function: ,
+		function: discordID,
+		type: "role",
 	}, {
-		name: "Agree channel",
-		emoji: "",
-		description: "",
+		name: "Mute Role",
+		emoji: "🔇",
+		description: "Change the role that is given to muted users.",
+		explanation: "The mute role defines the role given to a user when they are muted.",
+		dbEntry: "muteRole",
+		function: discordID,
+		type: "role",
+	}, {
+		name: "Agree Channel",
+		emoji: "💬",
+		description: "Change the channel that is used for running the agree command",
 		explanation: "",
 		dbEntry: "agreeChannel",
-		function: ,
+		function: discordID,
+		type: "channel",
 	}, {
-		name: "Agree role",
-		emoji: "",
+		name: "Agree Role",
+		emoji: "🚪",
 		description: "",
 		explanation: "",
 		dbEntry: "agreeRole",
-		function: ,
+		function: discordID,
+		type: "role",
 	}, {
 		name: "Kick confirms",
-		emoji: "",
+		emoji: "❔",
 		description: "",
 		explanation: "",
 		dbEntry: "kickConfirms",
 		function: onOrOff,
 	}, {
 		name: "Ban confirms",
-		emoji: "",
+		emoji: "❓",
 		description: "",
 		explanation: "",
 		dbEntry: "banConfirms",
 		function: onOrOff,
 	}, {
 		name: "Nuke limit",
-		emoji: "",
+		emoji: "💣",
 		description: "",
 		explanation: "",
 		dbEntry: "nukeLimit",
 		function: onOrOff,
 	}, {
 		name: "IP filter",
-		emoji: "",
+		emoji: "💻",
 		description: "",
 		explanation: "",
 		dbEntry: "ipFilter",
 		function: onOrOff,
 	}, {
 		name: "Raid mode",
-		emoji: "",
+		emoji: "❗️",
 		description: "",
 		explanation: "",
 		dbEntry: "raidMode",
@@ -216,26 +313,49 @@ module.exports = async(client, msg, suffix, doc) => {
 		description: "Goes back to the previous menu",
 		function: () => {
 			generateMenu(mainMenu);
-		}
+		},
 	}];
 
 	let utilityMenu = [{
 		name: "Starboard enabled",
-		emoji: "",
+		emoji: "⭐️",
 		description: "",
 		explanation: "",
 		dbEntry: "starboardEnabled",
 		function: onOrOff,
 	}, {
 		name: "Starboard channel",
-		emoji: "",
+		emoji: "🌠",
 		description: "",
 		explanation: "",
 		dbEntry: "starboardChannel",
-		function: ,
+		function: discordID,
+		type: "channel",
+	}, {
+		name: "Join Messages Enabled",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "newMemberEnabled",
+		function: stringConfig,
+	}, {
+		name: "Join Message Channel",
+		emoji: "",
+		description: "",
+		explanation: "",
+		dbEntry: "newMemberChannel",
+		function: discordID,
+		type: "channel",
+	}, {
+		name: "Join Message",
+		emoji: "📥",
+		description: "",
+		explanation: "",
+		dbEntry: "newMemberMessage",
+		function: stringConfig,
 	}, {
 		name: "Leave Messages Enabled",
-		emoji:"",
+		emoji: "",
 		description: "",
 		explanation: "",
 		dbEntry: "leaveEnabled",
@@ -246,7 +366,8 @@ module.exports = async(client, msg, suffix, doc) => {
 		description: "",
 		explanation: "",
 		dbEntry: "leaveChannel",
-		function: ,
+		function: discordID,
+		type: "channel",
 	}, {
 		name: "Leave Message",
 		emoji: "",
@@ -255,33 +376,12 @@ module.exports = async(client, msg, suffix, doc) => {
 		dbEntry: "leaveChannel",
 		function: stringConfig,
 	}, {
-		name: "Join messages",
-		emoji: "",
-		description: "",
-		explanation: "",
-		dbEntry: "newMemberEnabled",
-		function: ,
-	}, {
-		name: "Join channel",
-		emoji: "",
-		description: "",
-		explanation: "",
-		dbEntry: "newMemberChannel",
-		function: ,
-	}, {
-		name: "Join message",
-		emoji: "",
-		description: "",
-		explanation: "",
-		dbEntry: "newMemberMessage",
-		function: stringConfig,
-	}, {
 		name: "Go back",
 		emoji: "◀️",
 		description: "Goes back to the previous menu",
 		function: () => {
 			generateMenu(mainMenu);
-		}
+		},
 	}];
 
 	generateMenu(mainMenu);
