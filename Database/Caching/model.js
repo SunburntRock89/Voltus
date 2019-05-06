@@ -29,7 +29,7 @@ module.exports = class Model {
 
 		if (cachedOutput) {
 			return new resultFound({
-				values: cachedOutput,
+				dataValues: cachedOutput.dataValues,
 				cache: this.cache,
 			});
 		}
@@ -38,7 +38,7 @@ module.exports = class Model {
 		if (options.cache == undefined || options.cache) this.cache.set(generate(64), output);
 		if (output) {
 			return new resultFound({
-				values: output,
+				dataValues: output.dataValues,
 				cache: this.cache,
 			});
 		}
@@ -66,7 +66,7 @@ module.exports = class Model {
 
 		if (cachedOutput) {
 			return new resultFound({
-				values: cachedOutput,
+				dataValues: cachedOutput.dataValues,
 				cache: this.cache,
 			});
 		}
@@ -75,7 +75,7 @@ module.exports = class Model {
 		if (output) {
 			this.cache.set(generate(64), output);
 			return new resultFound({
-				values: output,
+				dataValues: output.dataValues,
 				cache: this.cache,
 			});
 		}
@@ -92,7 +92,7 @@ module.exports = class Model {
 		if (!options.where || !options.defaults) throw new Error("No where or default.");
 
 		let thing = await this.get(options);
-		if (thing) return new resultFound({ values: thing, cache: this.cache });
+		if (thing) return new resultFound({ values: thing.dataValues, cache: this.cache });
 
 		let result = await this.model.create(options.defaults);
 		return result;

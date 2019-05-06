@@ -2,7 +2,7 @@ const { getAdminLevel, getServerDoc } = require("../Internals/util.js");
 
 const public = alias => {
 	try {
-		cmdFile = reload(`./Commands/Public/${alias.name}`);
+		cmdFile = reload(`./Commands/Public/${alias.name}.js`);
 	} catch (err) {
 		return null;
 	}
@@ -34,7 +34,6 @@ module.exports = async msg => {
 	}
 
 	if (!msg.content.startsWith(doc.dataValues.prefix || `${client.user} `)) return;
-
 
 	let cmd = msg.content.split(" ")[0].trim().toLowerCase().replace(prefix, "");
 	let suffix = msg.content.split(" ").splice(1).join(" ")

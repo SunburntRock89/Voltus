@@ -1,23 +1,23 @@
 module.exports = class Result {
 	constructor(options) {
-		if (!options.values) {
-			throw new Error("No values to work with.");
+		if (!options.dataValues) {
+			throw new Error("No dataValues to work with.");
 		}
 
-		this.values = options.values;
+		this.dataValues = options.dataValues;
 		this.cache = options.cache;
 	}
 
-	get dataValues() {
-		return this.values;
+	get datadataValues() {
+		return this.dataValues;
 	}
 
 	set(options) {
-		this.values.set(options);
+		this.dataValues.set(options);
 	}
 
 	async save() {
-		this.cache.uncache(this.values.id);
-		return this.values.save();
+		this.cache.uncache(this.dataValues.id);
+		return this.dataValues.save();
 	}
 };
